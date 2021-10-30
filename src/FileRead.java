@@ -10,7 +10,7 @@ public class FileRead {
 
     private static void xmlParser(LinkedList<String> ls) {
         int i = 0;
-        String name;
+        String name = "";
         LinkedList<String> outcomes = new LinkedList<String>();
         String line = ls.get(i);
 
@@ -30,6 +30,7 @@ public class FileRead {
 
                 i++;
             }
+            NetworkNode n1 = new NetworkNode(name, LinkedListToArray(outcomes)); //HOW TO STORE NODES?????
         }
 
 
@@ -50,5 +51,11 @@ public class FileRead {
         return ls;
     }
 
-
+    private static String[] LinkedListToArray (LinkedList<String> ls) {
+        String[] str = new String[ls.size()];
+        for (int i = 0; i < ls.size(); i++) {
+            str[i] = ls.get(i);
+        }
+        return str;
+    }
 }
