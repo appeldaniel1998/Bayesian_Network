@@ -22,4 +22,18 @@ public class Transformations {
         }
         return ret;
     }
+
+    public static NetworkNode[] strToNetNode(LinkedList<String> str, LinkedList<NetworkNode> ls) {
+        //Method to transform strings of names of network nodes to network nodes.
+        NetworkNode[] ret = new NetworkNode[str.size()];
+        for (int i = 0; i < str.size(); i++) {
+            for (int j = 0; j < ls.size(); j++) {
+                if (str.get(i).equals(ls.get(j).getName())) {
+                    ret[i] = ls.get(j);
+                    break;
+                }
+            }
+        }
+        return ret;
+    }
 }

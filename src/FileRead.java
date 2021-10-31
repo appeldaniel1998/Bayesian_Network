@@ -5,7 +5,8 @@ import java.util.Scanner;
 
 public class FileRead {
     public static void main(String[] args) {
-        xmlParser(fileReaderToLinkedList("src/Assignment/alarm_net.xml"));
+        LinkedList<NetworkNode> ls = xmlParser(fileReaderToLinkedList("src/Assignment/alarm_net.xml"));
+        System.out.println();
     }
 
     private static LinkedList<NetworkNode> xmlParser(LinkedList<String> ls) {
@@ -64,7 +65,7 @@ public class FileRead {
                 }
                 NetworkNode temp = searchNode(ret, queryName);
                 temp.setTable(Transformations.stringArrtoDoubleArr(values));
-                temp.setParents();/////??????????????????????????
+                temp.setParents(Transformations.strToNetNode(parents, ret));
             }
 
         }
