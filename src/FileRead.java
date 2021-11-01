@@ -9,6 +9,39 @@ public class FileRead {
         System.out.println();
     }
 
+
+
+    private static void VariableHandling(LinkedList<String> allLines){
+        if (allLines.get(0) == "<VARIABLE") {
+            int i = 1;
+            while (allLines.get(i) != "</VARIABLE>") {
+                if ()
+            }
+        }
+        else {
+            return;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     private static LinkedList<NetworkNode> xmlParser(LinkedList<String> ls) {
         LinkedList<NetworkNode> ret = new LinkedList<NetworkNode>();
         int i = 0;
