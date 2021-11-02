@@ -15,7 +15,7 @@ public class Transformations {
         return str;
     }
 
-    public static double[] stringArrtoDoubleArr (String[] arr) {
+    public static double[] stringArrToDoubleArr (String[] arr) {
         double[] ret = new double[arr.length];
         for (int i = 0; i < arr.length; i++) {
             ret[i] = Double.parseDouble(arr[i]);

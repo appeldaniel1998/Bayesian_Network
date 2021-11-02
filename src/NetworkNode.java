@@ -6,7 +6,7 @@ public class NetworkNode {
     double[] table;
 
 
-    public NetworkNode(String name, String[] outcomes)
+    public NetworkNode(String name, String[] outcomes) //string array of names of parents
     {
         this.name = name;
         this.outcomes = outcomes;
