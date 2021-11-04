@@ -15,24 +15,18 @@ public class Utilities {
         return str;
     }
 
-    public static double[] stringArrToDoubleArr (String[] arr) {
-        double[] ret = new double[arr.length];
-        for (int i = 0; i < arr.length; i++) {
-            ret[i] = Double.parseDouble(arr[i]);
+    public static NetworkNode[] linkedListToArrayNodes (LinkedList<NetworkNode> ls) {
+        NetworkNode[] ret = new NetworkNode[ls.size()];
+        for (int i = 0; i < ls.size(); i++) {
+            ret[i] = ls.get(i);
         }
         return ret;
     }
 
-    public static NetworkNode[] strToNetNode(LinkedList<String> str, LinkedList<NetworkNode> ls) {
-        //Method to transform strings of names of network nodes to network nodes.
-        NetworkNode[] ret = new NetworkNode[str.size()];
-        for (int i = 0; i < str.size(); i++) {
-            for (int j = 0; j < ls.size(); j++) {
-                if (str.get(i).equals(ls.get(j).getName())) {
-                    ret[i] = ls.get(j);
-                    break;
-                }
-            }
+    public static double[] stringArrToDoubleArr (String[] arr) {
+        double[] ret = new double[arr.length];
+        for (int i = 0; i < arr.length; i++) {
+            ret[i] = Double.parseDouble(arr[i]);
         }
         return ret;
     }

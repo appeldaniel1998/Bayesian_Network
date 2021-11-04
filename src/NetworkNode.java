@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 public class NetworkNode {
     private String name;
     private String[] outcomes;
@@ -32,5 +34,10 @@ public class NetworkNode {
 
     public void setTable(double[] table) {
         this.table = table;
+    }
+
+    public String toString() {
+        return (this.name + ": \nOutcomes: " + Arrays.toString(this.outcomes) + "\nParents: " + Arrays.toString(this.parents) +
+                "\nChildren: " + Arrays.toString(this.children) + "\nTable: " + Arrays.toString(table) + "\n\n");
     }
 }
