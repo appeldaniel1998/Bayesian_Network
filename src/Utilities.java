@@ -1,6 +1,6 @@
 import java.util.LinkedList;
 
-public class Transformations {
+public class Utilities {
 
     /**
      * Transfers a LinkedList of Strings to an array of Strings with the same length.
@@ -35,5 +35,14 @@ public class Transformations {
             }
         }
         return ret;
+    }
+
+    public static NetworkNode searchNode(LinkedList<NetworkNode> ls, String query) {
+        for (int i = 0; i < ls.size(); i++) {
+            if (query.equals(ls.get(i).getName())) {
+                return ls.get(i);
+            }
+        }
+        return null;
     }
 }

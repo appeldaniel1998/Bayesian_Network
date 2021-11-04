@@ -35,7 +35,7 @@ public class FileRead {
             }
 
             String[] temp = new String[0];
-            temp = Transformations.linkedListToArray(outcomes);
+            temp = Utilities.linkedListToArray(outcomes);
             nodes.addLast(new NetworkNode(name, temp));
             outcomes = new LinkedList<String>();
             System.out.println(i);
@@ -49,52 +49,63 @@ public class FileRead {
 
 
 
-
-
-
-
-
-
     private static LinkedList<NetworkNode> DefinitionHandling(LinkedList<String> allLines, int firstIndex,
                                                               LinkedList<NetworkNode> nodes) {
-        String line;
 
-        String query;
-        NetworkNode queryFound = null;
-        LinkedList<String> givenLs = new LinkedList<String>();
-        NetworkNode[] parents = new NetworkNode[0];
+        String queryStr = "";
+        LinkedList<NetworkNode> givenStr = new LinkedList<NetworkNode>();
 
-        String table;
-        String[] tableArr = new String[0];
-        double[] tableDouble = new double[0];
-
-        for (int i = firstIndex + 1; i < allLines.size(); i++) {
-            while(!allLines.get(i).equals("</DEFINITION>")) {
-                line = allLines.get(i);
-                int tempLength = line.length();
-                if (tempLength != 0) {
-                    if (line.substring(0, 6).equals("\t<FOR>")) {
-                        query = line.substring(6, tempLength - 6);
-                        queryFound = searchNode(nodes, query);
-                    }
-                    if (line.substring(0, 8).equals("\t<GIVEN>")) {
-                        givenLs.addLast(line.substring(8, tempLength - 8));
-                    }
-                    if (line.substring(0, 8).equals("\t<TABLE>")) {
-                        table = line.substring(8, tempLength - 8);
-                        tableArr = table.split(" ");
-                        tableDouble = Transformations.stringArrToDoubleArr(tableArr);
-                    }
-                    parents = Transformations.strToNetNode(givenLs, nodes);
-                    queryFound.setParents(parents);
-                    queryFound.setTable(tableDouble);
-                }
+        for (int i = firstIndex; i < allLines.size(); i++)
+        {
+            if (allLines.get(i).equals("<DEFINITION>"))
+            {
                 i++;
+                while(!allLines.get(i).equals("</DEFINITION>"))
+                {
+                    String line = allLines.get(i);
+                    if (line.substring(0, 6).equals("\t<FOR>"))
+                    {
+                        queryStr = line.substring(6, line.length() - 6);
+                        NetworkNode queryNode = Utilities.searchNode(nodes, queryStr);
+                    }
+                    if (line.substring(0, 8).equals("\t<GIVEN>"))
+                    {
+                        queryStr = line.substring(8, line.length() - 8);
+                        NetworkNode temp = Utilities.searchNode(nodes, queryStr);
+                        givenStr.addLast(temp);
+                    }
 
+
+
+
+
+
+
+
+
+                    i++;
+                }
             }
-            parents = new NetworkNode[0];
-            givenLs = new LinkedList<String>();
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         return nodes;
     }
 
@@ -103,14 +114,7 @@ public class FileRead {
 
 
 
-    private static NetworkNode searchNode(LinkedList<NetworkNode> ls, String query) {
-        for (int i = 0; i < ls.size(); i++) {
-            if (query.equals(ls.get(i).getName())) {
-                return ls.get(i);
-            }
-        }
-        return null;
-    }
+
 
 
     private static LinkedList<NetworkNode> xmlParser(LinkedList<String> ls) {
