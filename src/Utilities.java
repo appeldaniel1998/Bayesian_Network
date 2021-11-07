@@ -1,6 +1,30 @@
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.LinkedList;
+import java.util.Scanner;
 
 public class Utilities {
+
+    /**
+     * Reading the XML file and converting it to an array of Strings, where each element is a line of the original XML.
+     * Also used for reading of TXT file
+     *
+     * @param str
+     * @return LinkedList of Strings
+     */
+    public static LinkedList<String> fileReaderToLinkedList(String str) {
+        LinkedList<String> ls = new LinkedList<String>();
+        Scanner sc = null;
+        try {
+            sc = new Scanner(new File(str));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        while (sc.hasNext()) {
+            ls.add(sc.nextLine());
+        }
+        return ls;
+    }
 
     /**
      * Transfers a LinkedList of Strings to an array of Strings with the same length.

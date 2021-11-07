@@ -1,22 +1,19 @@
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.LinkedList;
-import java.util.Scanner;
 
-public class FileRead {
+public class XmlFileParse {
     public static void main(String[] args) {
         LinkedList<NetworkNode> ls = xmlParser("src/Assignment/big_net.xml");
     }
 
     /**
-     * Main function of class and the only public one
+     * Main function of class and one of two public ones, parses the XML file.
      *
      * @param filePath: Relative path of file to be parsed (XML)
-     * @return parsed list of Nodes of the Network
+     * @return parsed list of Network Nodes
      */
     public static LinkedList<NetworkNode> xmlParser(String filePath) {
 
-        LinkedList<String> ls = fileReaderToLinkedList(filePath);
+        LinkedList<String> ls = Utilities.fileReaderToLinkedList(filePath);
         LinkedList<NetworkNode> nodes = new LinkedList<NetworkNode>();
         int i;
         int startIndexVars = 0;
@@ -39,26 +36,6 @@ public class FileRead {
     }
 
     /**
-     * Reading the XML file and converting it to an array of Strings, where each element is a line of the original XML
-     *
-     * @param str
-     * @return LinkedList of Strings
-     */
-    private static LinkedList<String> fileReaderToLinkedList(String str) {
-        LinkedList<String> ls = new LinkedList<String>();
-        Scanner sc = null;
-        try {
-            sc = new Scanner(new File(str));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        while (sc.hasNext()) {
-            ls.add(sc.nextLine());
-        }
-        return ls;
-    }
-
-    /**
      * @param allLines   Lines of the XML file as strings
      * @param firstIndex index of first appearance of <VARIABLE> tag
      * @param lastIndex  index of first appearance of <DEFINITION> tag - up to where the function is iterating
@@ -72,7 +49,8 @@ public class FileRead {
 
         LinkedList<NetworkNode> nodes = new LinkedList<NetworkNode>();
 
-        for (int i = firstIndex + 1; i < lastIndex - 1; i++) {
+        for (int i = firstIndex + 1; i < lastIndex - 1; i++) { // Iterating over the lines (some iteration over them happens
+            // inside the loop
             while (!allLines.get(i).equals("</VARIABLE>")) { // while the closing tag wasn't seen
                 String line = allLines.get(i);
                 int tempLength = line.length();
@@ -95,42 +73,48 @@ public class FileRead {
         return nodes;
     }
 
-
+    /**
+     *
+     * @param allLines list of Strings representing the XML file
+     * @param firstIndex index to start the parsing from (first occurrence of <DEFINITION> tag
+     * @param nodes list of nodes
+     * @return a completed LinkedList of Network Nodes.
+     */
     private static LinkedList<NetworkNode> DefinitionHandling(LinkedList<String> allLines, int firstIndex,
                                                               LinkedList<NetworkNode> nodes) {
 
-        String queryStr = "";
-        NetworkNode queryNode = null;
-        LinkedList<NetworkNode> givenNodes = new LinkedList<NetworkNode>();
-        double[] arrDou = new double[0];
+        String queryStr = ""; // to be the name of the node
+        NetworkNode queryNode = null; //init of the node to be worked on
+        LinkedList<NetworkNode> givenNodes = new LinkedList<NetworkNode>(); //init of parents LinkedList of nodes
+        double[] arrDou = new double[0]; //init of array to be table of the node
 
-        for (int i = firstIndex; i < allLines.size(); i++) {
-            if (allLines.get(i).equals("<DEFINITION>")) {
-                i++;
-                while (!allLines.get(i).equals("</DEFINITION>")) {
+        for (int i = firstIndex; i < allLines.size(); i++) { //iterating over the lines. Some iteration happens inside the loop.
+            if (allLines.get(i).equals("<DEFINITION>")) { //beginning of a block
+                i++; // was over this line
+                while (!allLines.get(i).equals("</DEFINITION>")) { //while not at end of block
                     String line = allLines.get(i);
                     if (line.substring(0, 6).equals("\t<FOR>")) {
                         queryStr = line.substring(6, line.length() - 6);
                         queryNode = Utilities.searchNode(nodes, queryStr);
                     }
-                    if (line.substring(0, 8).equals("\t<GIVEN>")) {
-                        queryStr = line.substring(8, line.length() - 8);
-                        NetworkNode temp = Utilities.searchNode(nodes, queryStr);
-                        givenNodes.addLast(temp);
+                    if (line.substring(0, 8).equals("\t<GIVEN>")) { // found name of a parent node
+                        queryStr = line.substring(8, line.length() - 8);  //setting it in a variable
+                        NetworkNode temp = Utilities.searchNode(nodes, queryStr); // finding the node corresponding to the name.
+                        givenNodes.addLast(temp); //adding node to list of parent nodes
                     }
-                    if (line.substring(0, 8).equals("\t<TABLE>")) {
+                    if (line.substring(0, 8).equals("\t<TABLE>")) { //found table
                         String temp = line.substring(8, line.length() - 8);
-                        String[] arrStr = temp.split(" ");
-                        arrDou = Utilities.stringArrToDoubleArr(arrStr);
+                        String[] arrStr = temp.split(" "); //values seperated by space. putting in a String array
+                        arrDou = Utilities.stringArrToDoubleArr(arrStr); //converting to a double array
                     }
                     i++;
                 }
                 queryNode.setTable(arrDou); //setting the table to the instance of NetworkNode
 
 
-                NetworkNode[] parents = new NetworkNode[0];
-                parents = Utilities.linkedListToArrayNodes(givenNodes);
-                givenNodes = new LinkedList<NetworkNode>();
+                NetworkNode[] parents = new NetworkNode[0]; //init of parents' array
+                parents = Utilities.linkedListToArrayNodes(givenNodes); //converting list to array of nodes
+                givenNodes = new LinkedList<NetworkNode>(); //emptying list
                 queryNode.setParents(parents);
             }
         }
