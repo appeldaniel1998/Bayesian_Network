@@ -46,4 +46,9 @@ public class VariableElimination implements Query {
     public void setGivenValues(String[] givenValues) {
         this.givenValues = givenValues;
     }
+
+    @Override
+    public String resultForQuery() { //TODO
+        return null;
+    }
 }

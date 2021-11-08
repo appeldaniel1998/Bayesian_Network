@@ -63,4 +63,16 @@ public class Utilities {
         }
         return null;
     }
+
+    public static boolean contains(NetworkNode[] arr, NetworkNode node) {
+        String name = node.getName();
+        for (int i = 0; i < arr.length; i++)
+        {
+            if (arr[i].getName().equals(name))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 }

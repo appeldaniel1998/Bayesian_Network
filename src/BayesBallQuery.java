@@ -1,11 +1,11 @@
 public class BayesBallQuery implements Query {
-    private NetworkNode queryNode1;
-    private NetworkNode queryNode2;
+    public static final int FROMCHILD = 0, FROMPARENT = 1;
+    private NetworkNode queryNode1; //src
+    private NetworkNode queryNode2; //dest
     private NetworkNode[] givenNodes;
     private String[] givenValues; //same length as givenNodes[]. Corresponds to values given as input in node
 
-    public BayesBallQuery(NetworkNode node1, NetworkNode node2, NetworkNode[] givenNodes, String[] givenValues)
-    {
+    public BayesBallQuery(NetworkNode node1, NetworkNode node2, NetworkNode[] givenNodes, String[] givenValues) {
         this.queryNode1 = node1;
         this.queryNode2 = node2;
         this.givenNodes = givenNodes;
@@ -42,5 +42,39 @@ public class BayesBallQuery implements Query {
 
     public void setGivenValues(String[] givenValues) {
         this.givenValues = givenValues;
+    }
+
+
+    /**
+     * Func will be done recursively:
+     * Stop sings and return a specific value:
+     * - the target node was reached
+     * - the algorithm was "stuck" with no other previously unvisited nodes which it can visit.
+     * - the algorithm returned to its starting point
+     * - if either the src or target nodes are coloured, they are conditionally independent
+     * <p>
+     * Allowed moves:
+     * - move to child:
+     * - if node is coloured, WE CANNOT
+     * - if node is not coloured,
+     */
+    @Override
+    public String resultForQuery() {
+        if (this.srcOrDestGiven()) return "yes";
+
+    }
+
+    private boolean conditionallyIndependent(NetworkNode currentNode) {
+    }
+
+
+    private boolean srcOrDestGiven() {
+        if (Utilities.contains(this.givenNodes, this.queryNode1)) {
+            return true;
+        }
+        if (Utilities.contains(this.givenNodes, this.queryNode2)) {
+            return true;
+        }
+        return false;
     }
 }
