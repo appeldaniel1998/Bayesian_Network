@@ -1,9 +1,15 @@
 import java.util.LinkedList;
 
 public class TextFileParse {
+    public static void main (String[] args)
+    {
+        textParse("src/Assignment/input.txt");
+    }
+
     public static LinkedList<Query> textParse(String filePath) {
         LinkedList<String> ls = Utilities.fileReaderToLinkedList(filePath);
         LinkedList<NetworkNode> nodes = XmlFileParse.xmlParser("src/Assignment/" + ls.get(0));
+        initChildrenOfAllNodes(nodes);
         LinkedList<Query> finalQueries = new LinkedList<Query>();
 
 
@@ -21,6 +27,12 @@ public class TextFileParse {
         return finalQueries;
     }
 
+    private static void initChildrenOfAllNodes (LinkedList<NetworkNode> nodes) {
+        for (int i = 0; i < nodes.size(); i++)
+        {
+            nodes.get(i).scanForChildren(nodes);
+        }
+    }
 
     private static VariableElimination varEliminationParse(String line, LinkedList<NetworkNode> nodes) {
         int indexOpenBracket = 1; //for the sake of clarity in later uses. Unchanged throughout the code
