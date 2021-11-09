@@ -42,24 +42,32 @@ public class NetworkNode {
         return (this.name + ": \nOutcomes: " + Arrays.toString(this.outcomes) + "\n\n");
     }
 
+    public boolean equals(Object o) {
+        if (!(o instanceof NetworkNode))
+        {
+            return false;
+        }
+        else
+        {
+            NetworkNode n1 = (NetworkNode) o;
+            return n1.getName().equals(this.name);
+        }
+    }
+
     public void scanForChildren(LinkedList<NetworkNode> nodes) {
         ArrayList<NetworkNode> childrenLst = new ArrayList<NetworkNode>();
 
-        for (int i = 0; i < nodes.size(); i++)
-        {
+        for (int i = 0; i < nodes.size(); i++) {
             NetworkNode[] parentsArr = nodes.get(i).getParents();
-            for (int j = 0; j < parentsArr.length; j++)
-            {
-                if (parentsArr[j].getName().equals(this.name))
-                {
+            for (int j = 0; j < parentsArr.length; j++) {
+                if (parentsArr[j].getName().equals(this.name)) {
                     childrenLst.add(nodes.get(i));
                     break;
                 }
             }
         }
         NetworkNode[] childrenArr = new NetworkNode[childrenLst.size()];
-        for (int i = 0; i < childrenArr.length; i++)
-        {
+        for (int i = 0; i < childrenArr.length; i++) {
             childrenArr[i] = childrenLst.get(i);
         }
         this.children = childrenArr;

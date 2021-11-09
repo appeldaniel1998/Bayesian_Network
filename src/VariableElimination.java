@@ -1,3 +1,5 @@
+import java.util.LinkedList;
+
 public class VariableElimination implements Query {
 
     private NetworkNode queryNode;
@@ -48,7 +50,7 @@ public class VariableElimination implements Query {
     }
 
     @Override
-    public String resultForQuery() { //TODO
+    public String resultForQuery(LinkedList<NetworkNode> nodes) { //TODO
         return null;
     }
 }
