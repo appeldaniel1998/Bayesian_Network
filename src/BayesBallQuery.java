@@ -7,6 +7,7 @@ public class BayesBallQuery implements Query {
     private NetworkNode[] givenNodes;
     private String[] givenValues; //same length as givenNodes[]. Corresponds to values given as input in node
 
+
     public BayesBallQuery(NetworkNode node1, NetworkNode node2, NetworkNode[] givenNodes, String[] givenValues) {
         this.src = node1;
         this.dest = node2;
@@ -14,19 +15,19 @@ public class BayesBallQuery implements Query {
         this.givenValues = givenValues;
     }
 
-    public NetworkNode getQueryNode1() {
+    public NetworkNode getQuerySrc() {
         return src;
     }
 
-    public void setQueryNode1(NetworkNode queryNode1) {
+    public void setQuerySrc(NetworkNode queryNode1) {
         this.src = queryNode1;
     }
 
-    public NetworkNode getQueryNode2() {
+    public NetworkNode getQueryDest() {
         return dest;
     }
 
-    public void setQueryNode2(NetworkNode queryNode2) {
+    public void setQueryDest(NetworkNode queryNode2) {
         this.dest = queryNode2;
     }
 
@@ -88,6 +89,10 @@ public class BayesBallQuery implements Query {
 
     }
 
+    private static void goToParents(NetworkNode currentNode)
+    {
+
+    }
 
     private boolean srcOrDestGiven() {
         if (Utilities.contains(this.givenNodes, this.src)) {

@@ -9,7 +9,7 @@ public class Utilities {
      * Reading the XML file and converting it to an array of Strings, where each element is a line of the original XML.
      * Also used for reading of TXT file
      *
-     * @param str
+     * @param str: File path
      * @return LinkedList of Strings
      */
     public static LinkedList<String> fileReaderToLinkedList(String str) {
@@ -28,7 +28,7 @@ public class Utilities {
 
     /**
      * Transfers a LinkedList of Strings to an array of Strings with the same length.
-     * @param ls
+     * @param ls: LinkedList of Strings
      * @return String[] str: the transformed LinkedList
      */
     public static String[] linkedListToArray (LinkedList<String> ls) {
@@ -39,6 +39,11 @@ public class Utilities {
         return str;
     }
 
+    /**
+     * Transforms a LinkedList of Network Nodes to an array of those nodes
+     * @param ls: LinkedList of Nodes
+     * @return Array of Nodes
+     */
     public static NetworkNode[] linkedListToArrayNodes (LinkedList<NetworkNode> ls) {
         NetworkNode[] ret = new NetworkNode[ls.size()];
         for (int i = 0; i < ls.size(); i++) {
@@ -47,6 +52,11 @@ public class Utilities {
         return ret;
     }
 
+    /**
+     * Transforms an array of strings to and array of doubles (each string is a number to be parsed to double)
+     * @param arr of strings
+     * @return array of doubles
+     */
     public static double[] stringArrToDoubleArr (String[] arr) {
         double[] ret = new double[arr.length];
         for (int i = 0; i < arr.length; i++) {
@@ -55,6 +65,12 @@ public class Utilities {
         return ret;
     }
 
+    /**
+     *
+     * @param ls: list of Nodes
+     * @param query: a String which is a name of some node
+     * @return the node for which the name was given (in query)
+     */
     public static NetworkNode searchNode(LinkedList<NetworkNode> ls, String query) {
         for (int i = 0; i < ls.size(); i++) {
             if (query.equals(ls.get(i).getName())) {
@@ -64,6 +80,12 @@ public class Utilities {
         return null;
     }
 
+    /**
+     * Returns whether a node exists in an array of nodes (according to the name of nodes)
+     * @param arr of Nodes
+     * @param node single Node
+     * @return boolean value
+     */
     public static boolean contains(NetworkNode[] arr, NetworkNode node) {
         String name = node.getName();
         for (int i = 0; i < arr.length; i++)
