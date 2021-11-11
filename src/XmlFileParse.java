@@ -1,9 +1,6 @@
 import java.util.LinkedList;
 
 public class XmlFileParse {
-    public static void main(String[] args) {
-        LinkedList<NetworkNode> ls = xmlParser("src/Assignment/big_net.xml");
-    }
 
     /**
      * Main function of class and one of two public ones, parses the XML file.

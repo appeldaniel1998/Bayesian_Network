@@ -1,12 +1,8 @@
 import java.util.LinkedList;
 
 public class TextFileParse {
-    public static void main (String[] args)
-    {
-        textParse("src/Assignment/input.txt");
-    }
 
-    public static LinkedList<Query> textParse(String filePath) {
+    public static Object[] textParse(String filePath) {
         LinkedList<String> ls = Utilities.fileReaderToLinkedList(filePath);
         LinkedList<NetworkNode> nodes = XmlFileParse.xmlParser("src/Assignment/" + ls.get(0));
         initChildrenOfAllNodes(nodes);
@@ -24,7 +20,10 @@ public class TextFileParse {
                 finalQueries.addLast(BayesParse(line, nodes));
             }
         }
-        return finalQueries;
+        Object[] ret = new Object[2];
+        ret[0] = nodes;
+        ret[1] = finalQueries;
+        return ret;
     }
 
     private static void initChildrenOfAllNodes (LinkedList<NetworkNode> nodes) {

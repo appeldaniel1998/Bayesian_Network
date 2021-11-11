@@ -26,6 +26,10 @@ public class NetworkNode {
         return parents;
     }
 
+    public NetworkNode[] getChildren() {
+        return children;
+    }
+
     public void setParents(NetworkNode[] parents) {
         this.parents = parents;
     }
