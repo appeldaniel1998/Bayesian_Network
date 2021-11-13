@@ -60,8 +60,11 @@ public class TextFileParse {
 
     private static BayesBallQuery BayesParse(String line, LinkedList<NetworkNode> nodes) {
         String[] splitByDefinition = line.split("\\|");
-        NetworkNode queryNode1 = Utilities.searchNode(nodes, splitByDefinition[0].substring(0, 1));
-        NetworkNode queryNode2 = Utilities.searchNode(nodes, splitByDefinition[0].substring(2, 3));
+
+        String[] queryNodesSplit = splitByDefinition[0].split("-");
+
+        NetworkNode queryNode1 = Utilities.searchNode(nodes, queryNodesSplit[0]);
+        NetworkNode queryNode2 = Utilities.searchNode(nodes, queryNodesSplit[1]);
         Object[] arr = new Object[0];
         try {
             arr = givenListParse(nodes, splitByDefinition[1]);

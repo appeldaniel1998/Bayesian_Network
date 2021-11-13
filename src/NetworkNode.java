@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 
 public class NetworkNode {
@@ -7,7 +6,8 @@ public class NetworkNode {
     private String[] outcomes;
     private NetworkNode[] parents;
     private NetworkNode[] children;
-    double[] table;
+    private double[] table;
+    private int timesVisited;
 
 
     public NetworkNode(String name, String[] outcomes) //string array of names of parents
@@ -16,6 +16,19 @@ public class NetworkNode {
         this.outcomes = outcomes;
         this.parents = new NetworkNode[0];
         this.children = new NetworkNode[0];
+        this.timesVisited = 0;
+    }
+
+    public int getTimesVisited() {
+        return timesVisited;
+    }
+
+    public void addTimesVisited() {
+        this.timesVisited++;
+    }
+
+    public void emptyTimesVisited() {
+        this.timesVisited = 0;
     }
 
     public String getName() {
@@ -42,17 +55,14 @@ public class NetworkNode {
         this.table = table;
     }
 
-    public String toString() {
-        return (this.name + ": \nOutcomes: " + Arrays.toString(this.outcomes) + "\n\n");
-    }
+//    public String toString() {
+//        return (this.name + ": \nOutcomes: " + Arrays.toString(this.outcomes) + "\n\n");
+//    }
 
     public boolean equals(Object o) {
-        if (!(o instanceof NetworkNode))
-        {
+        if (!(o instanceof NetworkNode)) {
             return false;
-        }
-        else
-        {
+        } else {
             NetworkNode n1 = (NetworkNode) o;
             return n1.getName().equals(this.name);
         }

@@ -97,4 +97,10 @@ public class Utilities {
         }
         return false;
     }
+
+    public static void zeroToAllTimesVisited(LinkedList<NetworkNode> nodes) {
+        for (int i = 0; i < nodes.size(); i++) {
+            nodes.get(i).emptyTimesVisited();
+        }
+    }
 }
