@@ -98,6 +98,28 @@ public class Utilities {
         return false;
     }
 
+    /**
+     * Checks and returns whether the String exists in an array
+     * @param arr of Strings
+     * @param str a single String
+     * @return
+     */
+    public static boolean contains(String[] arr, String str)
+    {
+        for (int i = 0; i < arr.length; i++)
+        {
+            if (arr[i].equals(str))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * The times visited field in each node in the list is set to 0 for future use
+     * @param nodes
+     */
     public static void zeroToAllTimesVisited(LinkedList<NetworkNode> nodes) {
         for (int i = 0; i < nodes.size(); i++) {
             nodes.get(i).emptyTimesVisited();

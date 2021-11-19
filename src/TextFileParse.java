@@ -20,9 +20,10 @@ public class TextFileParse {
                 finalQueries.addLast(BayesParse(line, nodes));
             }
         }
-        Object[] ret = new Object[2];
+        Object[] ret = new Object[3];
         ret[0] = nodes;
         ret[1] = finalQueries;
+        ret[2] = ls.get(0);
         return ret;
     }
 

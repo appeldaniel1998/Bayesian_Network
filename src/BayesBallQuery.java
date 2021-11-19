@@ -71,7 +71,7 @@ public class BayesBallQuery implements Query {
      * ________If not coloured, can go to any child
      */
     @Override
-    public String resultForQuery(LinkedList<NetworkNode> nodes) {
+    public String resultForQuery(LinkedList<NetworkNode> nodes, String XMLFilepath) {
         //answer the question: are the nodes conditionally independent?
         Utilities.zeroToAllTimesVisited(nodes);
         if (this.srcOrDestGiven()) return "yes"; //nodes conditionally independent if one of them is given
