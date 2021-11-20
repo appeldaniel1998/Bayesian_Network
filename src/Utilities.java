@@ -28,10 +28,11 @@ public class Utilities {
 
     /**
      * Transfers a LinkedList of Strings to an array of Strings with the same length.
+     *
      * @param ls: LinkedList of Strings
      * @return String[] str: the transformed LinkedList
      */
-    public static String[] linkedListToArray (LinkedList<String> ls) {
+    public static String[] linkedListToArray(LinkedList<String> ls) {
         String[] str = new String[ls.size()];
         for (int i = 0; i < ls.size(); i++) {
             str[i] = ls.get(i);
@@ -41,10 +42,11 @@ public class Utilities {
 
     /**
      * Transforms a LinkedList of Network Nodes to an array of those nodes
+     *
      * @param ls: LinkedList of Nodes
      * @return Array of Nodes
      */
-    public static NetworkNode[] linkedListToArrayNodes (LinkedList<NetworkNode> ls) {
+    public static NetworkNode[] linkedListToArrayNodes(LinkedList<NetworkNode> ls) {
         NetworkNode[] ret = new NetworkNode[ls.size()];
         for (int i = 0; i < ls.size(); i++) {
             ret[i] = ls.get(i);
@@ -53,11 +55,42 @@ public class Utilities {
     }
 
     /**
+     * Function to convert a linked list of arrays of strings to a 2D array of Strings
+     * @param lst
+     * @return String[][]
+     */
+    public static String[][] linkedListToArray(LinkedList<String[]> lst)
+    {
+        String[][] ret = new String[lst.size()][lst.get(0).length];
+        for(int i = 0; i < ret.length; i++)
+        {
+            ret[i] = lst.get(i);
+        }
+        return ret;
+    }
+
+    /**
+     * Function to convert a linked list of doubles to an array of doubles
+     * @param lst
+     * @return double[]
+     */
+    public static double[] linkedListToArray(LinkedList<Double> lst)
+    {
+        double[] ret = new double[lst.size()];
+        for(int i = 0; i < ret.length; i++)
+        {
+            ret[i] = lst.get(i);
+        }
+        return ret;
+    }
+
+    /**
      * Transforms an array of strings to and array of doubles (each string is a number to be parsed to double)
+     *
      * @param arr of strings
      * @return array of doubles
      */
-    public static double[] stringArrToDoubleArr (String[] arr) {
+    public static double[] stringArrToDoubleArr(String[] arr) {
         double[] ret = new double[arr.length];
         for (int i = 0; i < arr.length; i++) {
             ret[i] = Double.parseDouble(arr[i]);
@@ -66,8 +99,7 @@ public class Utilities {
     }
 
     /**
-     *
-     * @param ls: list of Nodes
+     * @param ls:    list of Nodes
      * @param query: a String which is a name of some node
      * @return the node for which the name was given (in query)
      */
@@ -82,16 +114,15 @@ public class Utilities {
 
     /**
      * Returns whether a node exists in an array of nodes (according to the name of nodes)
-     * @param arr of Nodes
+     *
+     * @param arr  of Nodes
      * @param node single Node
      * @return boolean value
      */
     public static boolean contains(NetworkNode[] arr, NetworkNode node) {
         String name = node.getName();
-        for (int i = 0; i < arr.length; i++)
-        {
-            if (arr[i].getName().equals(name))
-            {
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i].getName().equals(name)) {
                 return true;
             }
         }
@@ -100,16 +131,14 @@ public class Utilities {
 
     /**
      * Checks and returns whether the String exists in an array
+     *
      * @param arr of Strings
      * @param str a single String
      * @return
      */
-    public static boolean contains(String[] arr, String str)
-    {
-        for (int i = 0; i < arr.length; i++)
-        {
-            if (arr[i].equals(str))
-            {
+    public static boolean contains(String[] arr, String str) {
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i].equals(str)) {
                 return true;
             }
         }
@@ -118,11 +147,50 @@ public class Utilities {
 
     /**
      * The times visited field in each node in the list is set to 0 for future use
+     *
      * @param nodes
      */
     public static void zeroToAllTimesVisited(LinkedList<NetworkNode> nodes) {
         for (int i = 0; i < nodes.size(); i++) {
             nodes.get(i).emptyTimesVisited();
+        }
+    }
+
+    /**
+     * Returning the index of the str String in the arr array of Strings. If such doesn't exist, return -1.
+     * @param arr array of Strings
+     * @param str String
+     * @return index of str in arr
+     */
+    public static int indexOf(String[] arr, String str) {
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i].equals(str)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Implementing equals for two arrays of Strings
+     * @param arr1 first array
+     * @param arr2 second array
+     * @return returns true if all the array values are identical
+     */
+    public static boolean equals(String[] arr1, String[] arr2)
+    {
+        if (arr1.length != arr2.length)
+        {
+            return false;
+        }
+        else {
+            for (int i = 0; i < arr1.length; i++) {
+                if (arr1[i] != arr2[i])
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }
