@@ -17,35 +17,91 @@ public class VariableElimination implements Query {
         this.readingOrder = readingOrder;
     }
 
-    public NetworkNode getQueryNode() {
-        return queryNode;
-    }
-
-    public NetworkNode[] getGivenNodes() {
-        return givenNodes;
-    }
-
-    public String[] getGivenValues() {
-        return givenValues;
-    }
-
     @Override
     public String resultForQuery(LinkedList<NetworkNode> nodes, String XMLFilepath) {
         nodes = XmlFileParse.xmlParser(XMLFilepath);
         nodes = siphoningNotDependantNodes(nodes);
+        nodes = removeAllIrrelevantValues(nodes);
+
         for (int i = 0; i < this.readingOrder.length; i++) {
-            nodes = this.joinAll(nodes, readingOrder[i]);
+            Object[] arr = this.joinAll(nodes, readingOrder[i]);
         }
+        return null;
     }
 
-    private LinkedList<NetworkNode> joinAll(LinkedList<NetworkNode> nodes, NetworkNode by) {
+    /**
+     * Function to remove all data which contradicts to what was given in the query. Traverses all given nodes and all
+     * nodes for each of them, constructing the "improved" factor by removing unnecessary values. If a factor becomes
+     * one-valued, removes it. Returns the corrected list of nodes
+     *
+     * @param nodes list of nodes
+     * @return corrected list of nodes
+     */
+    public LinkedList<NetworkNode> removeAllIrrelevantValues(LinkedList<NetworkNode> nodes) {
+        for (int i = 0; i < this.givenNodes.length; i++) { // for each given node, traverse to find irrelevant values
+            for (int j = 0; j < nodes.size(); j++) { //iterating over the nodes to find irrelevant values
+                // (specifically of one given node)
+                String[][] currKeys = nodes.get(j).getTableKeys(); //current keys
+                double[] currValues = nodes.get(j).getTableValues(); //current values
+                if (Utilities.contains(currKeys[0], this.givenNodes[i].getName())) { //if such column name exists
+                    // (doest necessarily have to)
+                    LinkedList<String[]> newKeysLst = new LinkedList<>();
+                    LinkedList<Double> newValuesLst = new LinkedList<>();
+                    int indexOfNodeInKeys = Utilities.indexOf(currKeys[0], this.givenNodes[i].getName());
+                    newKeysLst.addLast(currKeys[0]); //adding first row (row of names of nodes) in any case
+                    for (int k = 1; k < currKeys.length; k++) {
+                        if (currKeys[k][indexOfNodeInKeys].equals(this.givenValues[i])) {
+                            newKeysLst.addLast(currKeys[k]);
+                            newValuesLst.addLast(currValues[k - 1]);
+                        }
+                    }
+                    if (newValuesLst.size() == 1) { //removing 1 valued factors
+                        nodes.remove(j);
+                    } else {
+                        nodes.get(j).setTableKeys(Utilities.linkedListTo2DArray(newKeysLst));
+                        nodes.get(j).setTableValues(Utilities.linkedListToDoubleArray(newValuesLst));
+                    }
+                }
+            }
+        }
+        return nodes;
+    }
+
+    /**
+     * A function to join all factors mentioning a node (specified by "by"). Returns the joined factor keys and values,
+     * the number of multiplication operations performed, as well as the list of nodes due to some nodes (all which
+     * were used in the joining) were removed
+     *
+     * @param nodes LinkedList of nodes
+     * @param by    A node by which to join
+     * @return Object[] containing all relevant info (to be parsed in parent function)
+     */
+    public Object[] joinAll(LinkedList<NetworkNode> nodes, NetworkNode by) {
         LinkedList<NetworkNode> nodeFactorsToJoin = findAllFactorsMentioning(nodes, by);
         String[][] currentFactorKeys = nodeFactorsToJoin.get(0).getTableKeys();
         double[] currFactorValues = nodeFactorsToJoin.get(0).getTableValues();
         int multiplyCount = 0;
         for (int i = 1; i < nodeFactorsToJoin.size(); i++) {
-
+            NetworkNode node = nodeFactorsToJoin.get(i);
+            Object[] temp = joinTwo(currentFactorKeys, currFactorValues, node.getTableKeys(), node.getTableValues());
+            currentFactorKeys = (String[][]) temp[0];
+            currFactorValues = (double[]) temp[1];
+            multiplyCount += (int) temp[2];
         }
+        LinkedList<NetworkNode> nodesAfterRemoval = new LinkedList<>();
+        for (int i = 0; i < nodes.size(); i++) { //removing all nodes which were used to create the new factor.
+            // All their information exists in the returned factor
+            if (!nodeFactorsToJoin.contains(nodes.get(i))) {
+                nodesAfterRemoval.addLast(nodes.get(i));
+            }
+        }
+
+        Object[] arr = new Object[4];
+        arr[0] = currentFactorKeys;
+        arr[1] = currFactorValues;
+        arr[2] = multiplyCount;
+        arr[3] = nodesAfterRemoval;
+        return arr;
     }
 
     /**
@@ -59,28 +115,28 @@ public class VariableElimination implements Query {
      * @return an Object array containing the factor's keys and values and the number of multiplication operations
      * (in that order)
      */
-    private Object[] joinTwo(String[][] firstFactorKeys, double[] firstFactorValues, String[][] secondFactorKeys,
-                             double[] secondFactorValues) {
+    public static Object[] joinTwo(String[][] firstFactorKeys, double[] firstFactorValues, String[][] secondFactorKeys,
+                                   double[] secondFactorValues) {
         LinkedList<String[]> newKeys = new LinkedList<>(); //keys to be created and returned
         LinkedList<Double> newValues = new LinkedList<>(); //values to be created and returned
-        int multiplicationCount = 0; //co be calculated and returned
+        int multiplicationCount = 0; //to be calculated and returned
         String[] correlatingNames = correlatingNames(firstFactorKeys[0], secondFactorKeys[0]);
         String[] onlyInFirst = notCorrelating(firstFactorKeys[0], correlatingNames);
         String[] onlyInSecond = notCorrelating(secondFactorKeys[0], correlatingNames);
         String[] header = concatStringArrays(correlatingNames, onlyInFirst, onlyInSecond); // header of the final table key 2D array
+        newKeys.add(header);
 
-
-        for (int i = 0; i < firstFactorKeys.length; i++) { //Iterating over rows of keys of the first factor
+        for (int i = 1; i < firstFactorKeys.length; i++) { //Iterating over rows of keys of the first factor
             String[] firstCurrCorrelatingValues = currValuesOfCorrelatingOrNot(firstFactorKeys, correlatingNames, i);
             String[] onlyFirstValues = currValuesOfCorrelatingOrNot(firstFactorKeys, onlyInFirst, i);
 
-            for (int j = 0; j < secondFactorKeys.length; j++) {
+            for (int j = 1; j < secondFactorKeys.length; j++) {
                 String[] secondCurrCorrelatingValues = currValuesOfCorrelatingOrNot(secondFactorKeys, correlatingNames, j);
-                String[] onlySecondValues = currValuesOfCorrelatingOrNot(firstFactorKeys, onlyInSecond, i);
+                String[] onlySecondValues = currValuesOfCorrelatingOrNot(secondFactorKeys, onlyInSecond, j);
                 if (Utilities.equals(firstCurrCorrelatingValues, secondCurrCorrelatingValues)) {
-                    String[] record = concatStringArrays(firstCurrCorrelatingValues, onlyInFirst, onlyInSecond);
+                    String[] record = concatStringArrays(firstCurrCorrelatingValues, onlyFirstValues, onlySecondValues);
                     newKeys.addLast(record);
-                    newValues.addLast(firstFactorValues[i] * secondFactorValues[j]);
+                    newValues.addLast(firstFactorValues[i - 1] * secondFactorValues[j - 1]);
                     multiplicationCount++;
                 }
             }
@@ -102,9 +158,9 @@ public class VariableElimination implements Query {
      * @param rowIndex index of row we are interested in, in the keys 2D array
      * @return String[]
      */
-    private static String[] currValuesOfCorrelatingOrNot(String[][] keys, String[] names, int rowIndex) {
+    public static String[] currValuesOfCorrelatingOrNot(String[][] keys, String[] names, int rowIndex) {
         int[] indexOfCorrelating = new int[names.length];
-        for (int i = 0; i < names.length; i++) {
+        for (int i = 0; i < names.length; i++) { //finding the right indexes to look for
             indexOfCorrelating[i] = Utilities.indexOf(keys[0], names[i]);
         }
 
@@ -124,7 +180,7 @@ public class VariableElimination implements Query {
      * @param inSecond
      * @return String[]
      */
-    private static String[] concatStringArrays(String[] common, String[] inFirst, String[] inSecond) {
+    public static String[] concatStringArrays(String[] common, String[] inFirst, String[] inSecond) {
         String[] ret = new String[common.length + inFirst.length + inSecond.length];
         int ind = 0;
         for (int i = 0; i < common.length; i++) {
@@ -140,25 +196,6 @@ public class VariableElimination implements Query {
     }
 
     /**
-     * Returns an array of Strings which are unique to this factor.
-     *
-     * @param factorNames      array of Strings
-     * @param correlatingNames array of non-unique strings in this array
-     * @return String[]
-     */
-    private static String[] notCorrelating(String[] factorNames, String[] correlatingNames) {
-        String[] ret = new String[factorNames.length - correlatingNames.length];
-        int ind = 0;
-        for (int i = 0; i < factorNames.length; i++) {
-            if (Utilities.contains(correlatingNames, factorNames[i])) {
-                ret[ind] = factorNames[i];
-                ind++;
-            }
-        }
-        return ret;
-    }
-
-    /**
      * Function to determine which of the node names given in the string arrays are the same,
      * meaning which of the node values have to be considered at the join
      *
@@ -166,7 +203,7 @@ public class VariableElimination implements Query {
      * @param secondFactor array of Strings with names of nodes
      * @return String[] containing the correlating names
      */
-    private static String[] correlatingNames(String[] firstFactor, String[] secondFactor) {
+    public static String[] correlatingNames(String[] firstFactor, String[] secondFactor) {
         LinkedList<String> lstRet = new LinkedList<>();
         for (int i = 0; i < firstFactor.length; i++) {
             for (int j = 0; j < secondFactor.length; j++) {
@@ -180,13 +217,32 @@ public class VariableElimination implements Query {
     }
 
     /**
+     * Returns an array of Strings which are unique to this factor.
+     *
+     * @param factorNames      array of Strings
+     * @param correlatingNames array of non-unique strings in this array
+     * @return String[]
+     */
+    public static String[] notCorrelating(String[] factorNames, String[] correlatingNames) {
+        String[] ret = new String[factorNames.length - correlatingNames.length];
+        int ind = 0;
+        for (int i = 0; i < factorNames.length; i++) {
+            if (!Utilities.contains(correlatingNames, factorNames[i])) {
+                ret[ind] = factorNames[i];
+                ind++;
+            }
+        }
+        return ret;
+    }
+
+    /**
      * function to remove nodes conditionally independent of the query node given all evidence nodes (done using the
      * Bayes Ball algorithm)
      *
      * @param nodes: LinkedList of Network Nodes
      * @return siphoned Linked List of nodes
      */
-    private LinkedList<NetworkNode> siphoningNotDependantNodes(LinkedList<NetworkNode> nodes) {
+    public LinkedList<NetworkNode> siphoningNotDependantNodes(LinkedList<NetworkNode> nodes) {
         for (int i = 0; i < nodes.size(); i++) {
             BayesBallQuery temp = new BayesBallQuery(queryNode, nodes.get(i), givenNodes, givenValues);
             boolean flagBayesBall = temp.resultForQuery(nodes, null).equals("yes");
@@ -206,8 +262,8 @@ public class VariableElimination implements Query {
      * @param what:  node to search
      * @return list of nodes containing the current query
      */
-    private LinkedList<NetworkNode> findAllFactorsMentioning(LinkedList<NetworkNode> nodes, NetworkNode what) {
-        LinkedList<NetworkNode> ret = new LinkedList<NetworkNode>();
+    public static LinkedList<NetworkNode> findAllFactorsMentioning(LinkedList<NetworkNode> nodes, NetworkNode what) {
+        LinkedList<NetworkNode> ret = new LinkedList<>();
         for (int i = 0; i < nodes.size(); i++) {
             String[] names = nodes.get(i).getTableKeys()[0];
             for (int j = 0; j < names.length; j++) {
@@ -217,11 +273,92 @@ public class VariableElimination implements Query {
                 }
             }
         }
-        return ret;
+        nodes = sortFactors(nodes);
+        return nodes;
+    }
+
+    /**
+     * function to sort a list of factors according to the size of their CPT tables.
+     * Wherever the CPT tables are of identical size, sort them by their ASCII values (in ascending order)
+     * Returning the sorted list of Network Nodes
+     *
+     * @param nodes
+     * @return LinkedList<NetworkNode>
+     */
+    public static LinkedList<NetworkNode> sortFactors(LinkedList<NetworkNode> nodes) {
+        //sorting by size
+        for (int i = 0; i < nodes.size(); i++) {
+            int minNodeInd = i;
+            int minSize = nodes.get(i).getTableKeys().length;
+            for (int j = 1; j < nodes.size() - 1; j++) {
+                if (nodes.get(j).getTableKeys().length < minSize) {
+                    minNodeInd = j;
+                    minSize = nodes.get(j).getTableKeys().length;
+                }
+            }
+            nodes = swap(nodes, i, minNodeInd);
+        }
+
+        //sorting by ASCII values if some sizes are identical (where needed)
+        int sameSizeNum = 1;
+        int beginningOfSameSizeInd = 0;
+        for (int i = 1; i < nodes.size(); i++) {
+            if (nodes.get(i).getTableKeys().length == nodes.get(i - 1).getTableKeys().length) {
+                sameSizeNum++;
+            } else {
+                if (sameSizeNum > 1) {
+                    nodes = sortByASCII(nodes, beginningOfSameSizeInd, i - 1);
+                }
+                sameSizeNum = 1;
+                beginningOfSameSizeInd = i + 1;
+            }
+        }
+        if (sameSizeNum > 1) {
+            nodes = sortByASCII(nodes, beginningOfSameSizeInd, nodes.size() - 1);
+            sameSizeNum = 0;
+        }
+
+        return nodes;
+    }
+
+    /**
+     * Sorting nodes in range of [startInd, endInd] according to the ASCII sum of first row of the keys table.
+     *
+     * @param nodes    list of nodes
+     * @param startInd starting index (included)
+     * @param endInd   end index (included)
+     * @return updated list of nodes
+     */
+    public static LinkedList<NetworkNode> sortByASCII(LinkedList<NetworkNode> nodes, int startInd, int endInd) {
+        for (int i = startInd; i <= endInd; i++) {
+            int minNodeInd = i;
+            int minSize = Utilities.asciiSize(nodes.get(i).getTableKeys()[0]);
+            for (int j = 1; j < nodes.size() - 1; j++) {
+                if (nodes.get(j).getTableKeys().length < minSize) {
+                    minNodeInd = j;
+                    minSize = Utilities.asciiSize(nodes.get(j).getTableKeys()[0]);
+                }
+            }
+            nodes = swap(nodes, i, minNodeInd);
+        }
+        return nodes;
+    }
+
+    /**
+     * Function to swap two nodes in the LinkedList with given indexes
+     *
+     * @param nodes list of nodes
+     * @param i     first index
+     * @param j     second index
+     * @return the list with swapped nodes
+     */
+    public static LinkedList<NetworkNode> swap(LinkedList<NetworkNode> nodes, int i, int j) {
+        NetworkNode temp = nodes.get(i);
+        nodes.set(i, nodes.get(j));
+        nodes.set(j, temp);
+        return nodes;
     }
 }
-
-
 
 
 

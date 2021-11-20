@@ -111,7 +111,7 @@ public class XmlFileParse {
                 parents = Utilities.linkedListToArrayNodes(givenNodes); //converting list to array of nodes
                 givenNodes = new LinkedList<NetworkNode>(); //emptying list
                 queryNode.setParents(parents);
-                queryNode.setTable(arrDou); //setting the table to the instance of NetworkNode
+                queryNode.setWholeTable(arrDou); //setting the table to the instance of NetworkNode
             }
         }
         return nodes;

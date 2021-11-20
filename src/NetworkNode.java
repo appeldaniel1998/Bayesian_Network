@@ -60,9 +60,17 @@ public class NetworkNode {
         return tableKeys;
     }
 
-    public void setTable(double[] table) {
+    public void setWholeTable(double[] table) {
         this.tableValues = table;
         this.initTable(table);
+    }
+
+    public void setTableKeys(String[][] arr) {
+        this.tableKeys = arr;
+    }
+
+    public void setTableValues(double[] arr) {
+        this.tableValues = arr;
     }
 
     public boolean equals(Object o) {

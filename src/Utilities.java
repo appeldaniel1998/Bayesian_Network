@@ -56,14 +56,13 @@ public class Utilities {
 
     /**
      * Function to convert a linked list of arrays of strings to a 2D array of Strings
+     *
      * @param lst
      * @return String[][]
      */
-    public static String[][] linkedListTo2DArray(LinkedList<String[]> lst)
-    {
+    public static String[][] linkedListTo2DArray(LinkedList<String[]> lst) {
         String[][] ret = new String[lst.size()][lst.get(0).length];
-        for(int i = 0; i < ret.length; i++)
-        {
+        for (int i = 0; i < ret.length; i++) {
             ret[i] = lst.get(i);
         }
         return ret;
@@ -71,14 +70,13 @@ public class Utilities {
 
     /**
      * Function to convert a linked list of doubles to an array of doubles
+     *
      * @param lst
      * @return double[]
      */
-    public static double[] linkedListToDoubleArray(LinkedList<Double> lst)
-    {
+    public static double[] linkedListToDoubleArray(LinkedList<Double> lst) {
         double[] ret = new double[lst.size()];
-        for(int i = 0; i < ret.length; i++)
-        {
+        for (int i = 0; i < ret.length; i++) {
             ret[i] = lst.get(i);
         }
         return ret;
@@ -158,6 +156,7 @@ public class Utilities {
 
     /**
      * Returning the index of the str String in the arr array of Strings. If such doesn't exist, return -1.
+     *
      * @param arr array of Strings
      * @param str String
      * @return index of str in arr
@@ -173,24 +172,38 @@ public class Utilities {
 
     /**
      * Implementing equals for two arrays of Strings
+     *
      * @param arr1 first array
      * @param arr2 second array
      * @return returns true if all the array values are identical
      */
-    public static boolean equals(String[] arr1, String[] arr2)
-    {
-        if (arr1.length != arr2.length)
-        {
+    public static boolean equals(String[] arr1, String[] arr2) {
+        if (arr1.length != arr2.length) {
             return false;
-        }
-        else {
+        } else {
             for (int i = 0; i < arr1.length; i++) {
-                if (arr1[i] != arr2[i])
-                {
+                if (arr1[i] != arr2[i]) {
                     return false;
                 }
             }
             return true;
         }
+    }
+
+    /**
+     * Function to calculate the ascii value of a String array (the sum of all elements) and return it
+     *
+     * @param arr array to traverse
+     * @return int value
+     */
+    public static int asciiSize(String[] arr) {
+        int sum = 0;
+        for (int i = 0; i < arr.length; i++) {
+            for (int j = 0; j < arr[i].length(); j++)
+            {
+                sum += (int) arr[i].charAt(j);
+            }
+        }
+        return sum;
     }
 }

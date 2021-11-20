@@ -23,7 +23,7 @@ public class TextFileParse {
         Object[] ret = new Object[3];
         ret[0] = nodes;
         ret[1] = finalQueries;
-        ret[2] = ls.get(0);
+        ret[2] = "src/Assignment/" + ls.get(0);
         return ret;
     }
 
