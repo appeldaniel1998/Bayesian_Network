@@ -87,8 +87,8 @@ public class VariableElimination implements Query {
         }
 
         Object[] ret = new Object[3];
-        ret[0] = Utilities.linkedListToArray(newKeys);
-        ret[1] = Utilities.linkedListToArray(newValues);
+        ret[0] = Utilities.linkedListTo2DArray(newKeys);
+        ret[1] = Utilities.linkedListToDoubleArray(newValues);
         ret[2] = multiplicationCount;
         return ret;
     }

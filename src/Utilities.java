@@ -59,7 +59,7 @@ public class Utilities {
      * @param lst
      * @return String[][]
      */
-    public static String[][] linkedListToArray(LinkedList<String[]> lst)
+    public static String[][] linkedListTo2DArray(LinkedList<String[]> lst)
     {
         String[][] ret = new String[lst.size()][lst.get(0).length];
         for(int i = 0; i < ret.length; i++)
@@ -74,7 +74,7 @@ public class Utilities {
      * @param lst
      * @return double[]
      */
-    public static double[] linkedListToArray(LinkedList<Double> lst)
+    public static double[] linkedListToDoubleArray(LinkedList<Double> lst)
     {
         double[] ret = new double[lst.size()];
         for(int i = 0; i < ret.length; i++)
