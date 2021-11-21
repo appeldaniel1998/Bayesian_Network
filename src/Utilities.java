@@ -206,4 +206,42 @@ public class Utilities {
         }
         return sum;
     }
+
+    /**
+     * Removing the element in index ind from the array and returning it.
+     * @param arr array of Strings
+     * @param ind index to remove
+     * @return corrected array
+     */
+    public static String[] removeElement (String[] arr, int ind)
+    {
+        String[] ret = new String[arr.length-1];
+        int retInd = 0;
+        for (int i = 0; i < arr.length; i++)
+        {
+            if (i != ind)
+            {
+                ret[retInd++] = arr[i];
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * Returns true if a linked list of String[] contains a String[] as passed in arr
+     * @param lst LinkedList<String[]>
+     * @param arr String[]
+     * @return corresponding boolean value
+     */
+    public static boolean contains (LinkedList<String[]> lst, String[] arr)
+    {
+        for (int i = 0; i < lst.size(); i++)
+        {
+            if (equals(lst.get(i), arr))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 }

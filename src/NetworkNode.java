@@ -9,6 +9,7 @@ public class NetworkNode {
     private double[] tableValues;
     private String[][] tableKeys;
     private int timesVisited;
+    private static int ind = 0;
 
 
     public NetworkNode(String name, String[] outcomes) //string array of names of parents
@@ -18,6 +19,14 @@ public class NetworkNode {
         this.parents = new NetworkNode[0];
         this.children = new NetworkNode[0];
         this.timesVisited = 0;
+    }
+
+    public NetworkNode(String[][] keys, double[] values) //instantiating an unimportant node with an important factor
+    {
+        this.name = java.util.UUID.randomUUID().toString();; //a certain String that will never be a name of a real node
+        ind++;
+        this.tableKeys = keys;
+        this.tableValues = values;
     }
 
     public String[] getOutcomes() {

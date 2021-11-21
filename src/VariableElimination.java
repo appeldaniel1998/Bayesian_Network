@@ -22,12 +22,65 @@ public class VariableElimination implements Query {
         nodes = XmlFileParse.xmlParser(XMLFilepath);
         nodes = siphoningNotDependantNodes(nodes);
         nodes = removeAllIrrelevantValues(nodes);
+        int multiplyCount = 0;
+        int additionCount = 0;
 
         for (int i = 0; i < this.readingOrder.length; i++) {
             Object[] arr = this.joinAll(nodes, readingOrder[i]);
+            multiplyCount += (int) arr[0];
+            nodes = (LinkedList<NetworkNode>) arr[1];
+            //join and parse of returned values up to here
+
+            Object[] arr2 = eliminate(nodes.getLast().getTableKeys(), nodes.getLast().getTableValues(),
+                    readingOrder[i].getName());
+            String[][] currKeys = (String[][]) arr2[0];
+            double[] currValues = (double[]) arr2[1];
+            additionCount += (int) arr2[2];
+            nodes.getLast().setTableKeys(currKeys);
+            nodes.getLast().setTableValues(currValues);
         }
         return null;
     }
+
+
+    /**
+     * Function to implement elimination of a variable ("by") from a factor given. This is done by "summing out" the
+     * different outcomes of this variable into a single record
+     *
+     * @param factorKeys   keys of the factor
+     * @param factorValues values of the factor
+     * @param by           the variable to sub out (as String)
+     * @return The shrunken factor as Object[] to transfer both keys and values to the parent function, as well as the
+     * number of addition operations performed
+     */
+    public static Object[] eliminate(String[][] factorKeys, double[] factorValues, String by) {
+        int byIndex = Utilities.indexOf(factorKeys[0], by);
+        LinkedList<String[]> newKeys = new LinkedList<>();
+        LinkedList<Double> newValues = new LinkedList<>();
+        int additionCount = 0;
+        newKeys.addLast(Utilities.removeElement(factorKeys[0], byIndex)); //adding column names to the new factor Keys
+        for (int i = 1; i < factorKeys.length; i++) {
+            double currValue = factorValues[i - 1];
+            String[] currRecordKeys = Utilities.removeElement(factorKeys[i], byIndex);
+            if (!Utilities.contains(newKeys, currRecordKeys)) {
+                for (int j = i + 1; j < factorKeys.length; j++) {
+                    String[] tempKeys = Utilities.removeElement(factorKeys[j], byIndex);
+                    if (Utilities.equals(tempKeys, currRecordKeys)) {
+                        currValue += factorValues[j - 1];
+                        additionCount++;
+                    }
+                }
+                newKeys.addLast(currRecordKeys);
+                newValues.addLast(currValue);
+            }
+        }
+        Object[] arr = new Object[3];
+        arr[0] = Utilities.linkedListTo2DArray(newKeys);
+        arr[1] = Utilities.linkedListToDoubleArray(newValues);
+        arr[2] = additionCount;
+        return arr;
+    }
+
 
     /**
      * Function to remove all data which contradicts to what was given in the query. Traverses all given nodes and all
@@ -95,12 +148,11 @@ public class VariableElimination implements Query {
                 nodesAfterRemoval.addLast(nodes.get(i));
             }
         }
-
-        Object[] arr = new Object[4];
-        arr[0] = currentFactorKeys;
-        arr[1] = currFactorValues;
-        arr[2] = multiplyCount;
-        arr[3] = nodesAfterRemoval;
+        NetworkNode temp = new NetworkNode(currentFactorKeys, currFactorValues);
+        nodesAfterRemoval.addLast(temp);
+        Object[] arr = new Object[2];
+        arr[0] = multiplyCount;
+        arr[1] = nodesAfterRemoval;
         return arr;
     }
 
