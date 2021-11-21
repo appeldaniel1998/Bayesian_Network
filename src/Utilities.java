@@ -244,4 +244,16 @@ public class Utilities {
         }
         return false;
     }
+
+    public static boolean contains (LinkedList<NetworkNode> lst, NetworkNode node)
+    {
+        for (int i = 0; i < lst.size(); i++)
+        {
+            if (node.equals(lst.get(i)))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 }

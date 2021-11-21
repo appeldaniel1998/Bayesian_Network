@@ -21,27 +21,80 @@ public class VariableElimination implements Query {
     public String resultForQuery(LinkedList<NetworkNode> nodes, String XMLFilepath) {
         nodes = XmlFileParse.xmlParser(XMLFilepath);
         nodes = siphoningNotDependantNodes(nodes);
+        nodes = siphoningNotAncestorNodes(nodes);
         nodes = removeAllIrrelevantValues(nodes);
         int multiplyCount = 0;
         int additionCount = 0;
 
-        for (int i = 0; i < this.readingOrder.length; i++) {
-            Object[] arr = this.joinAll(nodes, readingOrder[i]);
+        for (int i = 0; i < this.readingOrder.length; i++) { //iterating over all hidden values
+            Object[] arr = joinAll(nodes, readingOrder[i]);
             multiplyCount += (int) arr[0];
             nodes = (LinkedList<NetworkNode>) arr[1];
             //join and parse of returned values up to here
 
             Object[] arr2 = eliminate(nodes.getLast().getTableKeys(), nodes.getLast().getTableValues(),
-                    readingOrder[i].getName());
+                    readingOrder[i].getName()); //eliminating the current node from reading order from the last factor,
+            // as it was the one added during the join function
             String[][] currKeys = (String[][]) arr2[0];
             double[] currValues = (double[]) arr2[1];
             additionCount += (int) arr2[2];
             nodes.getLast().setTableKeys(currKeys);
             nodes.getLast().setTableValues(currValues);
+            //Elimination handling up to here: parsing and assignment of the corrected
         }
+        /*
+        now the nodes contain no hidden factors. We need to join the rest of the factors. The factors that may still
+        remain shall only contain the query and evidence values (where the evidence shall be one-valued), hence we
+        must join the factors by the query to result in a single factor (to normalize and return the result).
+        */
+
+        for (int i = 0; i < nodes.size(); i++) { // Joining the remaining factors
+            Object[] arr = joinAll(nodes, nodes.get(i));
+            multiplyCount += (int) arr[0];
+            nodes = (LinkedList<NetworkNode>) arr[1];
+        }
+
+        Object[] arrFinal = normalize(nodes, this.queryNode);
+
         return null;
     }
 
+    public static Object[] normalize (LinkedList<NetworkNode> nodes, NetworkNode queryNode)
+    {
+        int additionCount = 0;
+        String[][] keys = nodes.get(0).getTableKeys();
+        double[] values = nodes.get(0).getTableValues();
+        int indOfQuery = Utilities.indexOf(keys[0], queryNode.getName());
+        double sum = 0;
+
+        double[] newValues = new double[queryNode.getOutcomes().length];
+
+        for (int i = 0; i < queryNode.getOutcomes().length; i++)
+        {
+            int currValue = 0;
+            for(int j = 1; j < keys.length; j++)
+            {
+                if (keys[j][indOfQuery].equals(queryNode.getOutcomes()[i]))
+                {
+                    currValue += values[j-1];
+                    additionCount++;
+                }
+            }
+            newValues[i] = currValue;
+            sum += currValue;
+        }
+
+        for(int i = 0; i < newValues.length; i++) //normalizing
+        {
+            newValues[i] = newValues[i]/sum;
+        }
+
+
+
+        Object[] arr = new Object[2];
+//        arr[0] =
+
+    }
 
     /**
      * Function to implement elimination of a variable ("by") from a factor given. This is done by "summing out" the
@@ -129,7 +182,7 @@ public class VariableElimination implements Query {
      * @param by    A node by which to join
      * @return Object[] containing all relevant info (to be parsed in parent function)
      */
-    public Object[] joinAll(LinkedList<NetworkNode> nodes, NetworkNode by) {
+    public static Object[] joinAll(LinkedList<NetworkNode> nodes, NetworkNode by) {
         LinkedList<NetworkNode> nodeFactorsToJoin = findAllFactorsMentioning(nodes, by);
         String[][] currentFactorKeys = nodeFactorsToJoin.get(0).getTableKeys();
         double[] currFactorValues = nodeFactorsToJoin.get(0).getTableValues();
@@ -285,6 +338,43 @@ public class VariableElimination implements Query {
             }
         }
         return ret;
+    }
+
+
+    /**
+     * function to return all ancestors of given and query nodes (whatever node is not included shall be
+     * excluded from further considerations)
+     *
+     * @param nodes
+     * @return
+     */
+    public LinkedList<NetworkNode> siphoningNotAncestorNodes(LinkedList<NetworkNode> nodes) {
+        LinkedList<NetworkNode> areAncestors = new LinkedList<>();
+        areAncestors = ancestorTraverse(nodes, this.queryNode, areAncestors);
+        for (int i = 0; i < this.givenNodes.length; i++) {
+            areAncestors = ancestorTraverse(nodes, this.givenNodes[i], areAncestors);
+        }
+        return areAncestors;
+    }
+
+    /**
+     * Recursive function to insert all ancestors of a node into an existing list (given as input) and return it
+     *
+     * @param nodes        total LinkedList of nodes
+     * @param currNode     current node
+     * @param areAncestors list of ancestors already existing
+     * @return
+     */
+    public static LinkedList<NetworkNode> ancestorTraverse(LinkedList<NetworkNode> nodes, NetworkNode currNode,
+                                                           LinkedList<NetworkNode> areAncestors) {
+        if (currNode.getParents().length == 0 || Utilities.contains(nodes, currNode)) {
+            return areAncestors;
+        }
+        areAncestors.addLast(currNode);
+        for (int i = 0; i < currNode.getParents().length; i++) {
+            areAncestors = ancestorTraverse(nodes, currNode.getParents()[i], areAncestors);
+        }
+        return areAncestors;
     }
 
     /**
