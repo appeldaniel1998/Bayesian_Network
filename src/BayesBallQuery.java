@@ -10,8 +10,11 @@ public class BayesBallQuery implements Query {
 
     public BayesBallQuery(NetworkNode node1, NetworkNode node2, NetworkNode[] givenNodes, String[] givenValues) {
         this.src = node1;
+        this.src.emptyTimesVisited();
         this.dest = node2;
+        this.dest.emptyTimesVisited();
         this.givenNodes = givenNodes;
+        Utilities.zeroToAllTimesVisited(this.givenNodes);
         this.givenValues = givenValues;
     }
 
@@ -73,7 +76,7 @@ public class BayesBallQuery implements Query {
     @Override
     public String resultForQuery(LinkedList<NetworkNode> nodes, String XMLFilepath) {
         //answer the question: are the nodes conditionally independent?
-        Utilities.zeroToAllTimesVisited(nodes);
+        nodes = Utilities.zeroToAllTimesVisited(nodes);
         if (this.srcOrDestGiven()) return "yes"; //nodes conditionally independent if one of them is given
         if (this.conditionallyIndependent(nodes, ANY, this.src, true)) return "yes";
         else return "no";
@@ -111,6 +114,7 @@ public class BayesBallQuery implements Query {
 
     private boolean goToParents(LinkedList<NetworkNode> nodes, NetworkNode currentNode) {
         NetworkNode[] parents = currentNode.getParents();
+        parents = Utilities.zeroToAllTimesVisited(parents);
         if (parents.length == 0) return true;
         boolean ret = true;
         for (int i = 0; i < parents.length; i++) {
@@ -127,6 +131,7 @@ public class BayesBallQuery implements Query {
 
     private boolean goToChildren(LinkedList<NetworkNode> nodes, NetworkNode currentNode) {
         NetworkNode[] children = currentNode.getChildren();
+        children = Utilities.zeroToAllTimesVisited(children);
         if (children.length == 0) return true;
         boolean ret = true;
         for (int i = 0; i < children.length; i++) {

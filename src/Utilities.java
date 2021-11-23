@@ -148,10 +148,17 @@ public class Utilities {
      *
      * @param nodes
      */
-    public static void zeroToAllTimesVisited(LinkedList<NetworkNode> nodes) {
+    public static LinkedList<NetworkNode> zeroToAllTimesVisited(LinkedList<NetworkNode> nodes) {
         for (int i = 0; i < nodes.size(); i++) {
             nodes.get(i).emptyTimesVisited();
         }
+        return nodes;
+    }
+    public static NetworkNode[] zeroToAllTimesVisited(NetworkNode[] nodes) {
+        for (int i = 0; i < nodes.length; i++) {
+            nodes[i].emptyTimesVisited();
+        }
+        return nodes;
     }
 
     /**
@@ -255,5 +262,15 @@ public class Utilities {
             }
         }
         return false;
+    }
+
+    public static LinkedList<NetworkNode> arrToLinkedListNodes(NetworkNode[] arr)
+    {
+        LinkedList<NetworkNode> ret = new LinkedList<>();
+        for (int i = 0; i < arr.length; i++)
+        {
+            ret.addLast(arr[i]);
+        }
+        return ret;
     }
 }

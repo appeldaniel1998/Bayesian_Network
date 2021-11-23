@@ -1,12 +1,11 @@
 import java.util.Arrays;
 import java.util.LinkedList;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class VariableEliminationTest {
 
-    public static final double DELTA = 0.001*0.001;
+    public static final double DELTA = 0.001 * 0.001;
 
 //    @org.junit.jupiter.api.Test
 //    void resultForQuery() {
@@ -22,7 +21,7 @@ class VariableEliminationTest {
 //
 
 
-    private static String[][] init1() {
+    private static String[][] initKeys1() {
         String[] arr1 = {"a", "b", "c", "d", "e", "f", "g", "h"};
         String[] arr2 = {"a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"};
         String[] arr3 = {"a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2"};
@@ -32,7 +31,7 @@ class VariableEliminationTest {
         return new String[][]{arr1, arr2, arr3, arr4, arr5, arr6};
     }
 
-    private static String[][] init2() {
+    private static String[][] initKeys2() {
         String[] arr1 = {"i", "c", "j", "e", "k", "f", "l", "g"};
         String[] arr2 = {"i1", "c1", "j1", "e1", "k1", "f1", "l1", "g1"};
         String[] arr3 = {"i2", "c2", "j2", "e2", "k2", "f2", "l2", "g2"};
@@ -42,9 +41,14 @@ class VariableEliminationTest {
         return new String[][]{arr1, arr2, arr3, arr4, arr5, arr6};
     }
 
+    private static LinkedList<NetworkNode> initBigNet() {
+        LinkedList<NetworkNode> ret = XmlFileParse.xmlParser("src/Assignment/big_net.xml");
+        return ret;
+    }
+
     @org.junit.jupiter.api.Test
     void currValuesOfCorrelatingOrNot() {
-        String[][] arr = init1();
+        String[][] arr = initKeys1();
         String[] names = {"a", "e", "g"};
         int row = 3;
         String[] ret = VariableElimination.currValuesOfCorrelatingOrNot(arr, names, row);
@@ -65,8 +69,8 @@ class VariableEliminationTest {
 
     @org.junit.jupiter.api.Test
     void correlatingNames() {
-        String[] arr1 = init1()[0];
-        String[] arr2 = init2()[0];
+        String[] arr1 = initKeys1()[0];
+        String[] arr2 = initKeys2()[0];
         String[] expected = {"c", "e", "f", "g"};
         String[] ret = VariableElimination.correlatingNames(arr1, arr2);
 
@@ -75,7 +79,7 @@ class VariableEliminationTest {
 
     @org.junit.jupiter.api.Test
     void notCorrelating() {
-        String[] arr1 = init1()[0];
+        String[] arr1 = initKeys1()[0];
         String[] corr = {"a", "c", "g"};
         String[] ret = VariableElimination.notCorrelating(arr1, corr);
         String[] expected = {"b", "d", "e", "f", "h"};
@@ -83,10 +87,6 @@ class VariableEliminationTest {
 
         assertArrayEquals(expected, ret);
     }
-
-//    @org.junit.jupiter.api.Test
-//    void siphoningNotDependantNodes() {
-//    }
 
     @org.junit.jupiter.api.Test
     void findAllFactorsMentioning() {
@@ -103,9 +103,9 @@ class VariableEliminationTest {
 
         LinkedList<NetworkNode> retA = VariableElimination.findAllFactorsMentioning(nodes, nodes.get(2));
         assertEquals(retA.size(), 3);
-        assertEquals(retA.get(0).getName(), "A");
-        assertEquals(retA.get(1).getName(), "J");
-        assertEquals(retA.get(2).getName(), "M");
+        assertEquals(retA.get(0).getName(), "J");
+        assertEquals(retA.get(1).getName(), "M");
+        assertEquals(retA.get(2).getName(), "A");
     }
 
     @org.junit.jupiter.api.Test
@@ -118,6 +118,23 @@ class VariableEliminationTest {
         assertArrayEquals(arrDouble, (double[]) arr[1], DELTA);
     }
 
+    @org.junit.jupiter.api.Test
+    void swap() {
+        LinkedList<NetworkNode> nodes = initBigNet();
+        LinkedList<NetworkNode> nodes2 = VariableElimination.swap(nodes, 3,6);
+        assertEquals(nodes.get(3).getName(), nodes2.get(6).getName());
+        assertEquals(nodes.get(6).getName(), nodes2.get(3).getName());
+    }
+
+    @org.junit.jupiter.api.Test
+    void sortFactors() {
+        LinkedList<NetworkNode> nodes = initBigNet();
+        nodes = VariableElimination.sortFactors(nodes);
+        for (int i = 1; i < nodes.size(); i++)
+        {
+            assertTrue(nodes.get(i-1).getTableKeys().length <= nodes.get(i).getTableKeys().length);
+        }
+    }
 }
 
 

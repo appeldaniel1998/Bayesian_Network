@@ -41,6 +41,7 @@ public class VariableElimination implements Query {
             nodes.getLast().setTableKeys(currKeys);
             nodes.getLast().setTableValues(currValues);
             //Elimination handling up to here: parsing and assignment of the corrected
+            System.out.println("finished " + i);
         }
         /*
         now the nodes contain no hidden factors. We need to join the rest of the factors. The factors that may still
@@ -48,52 +49,83 @@ public class VariableElimination implements Query {
         must join the factors by the query to result in a single factor (to normalize and return the result).
         */
 
-        for (int i = 0; i < nodes.size(); i++) { // Joining the remaining factors
-            Object[] arr = joinAll(nodes, nodes.get(i));
-            multiplyCount += (int) arr[0];
-            nodes = (LinkedList<NetworkNode>) arr[1];
-        }
 
-        Object[] arrFinal = normalize(nodes, this.queryNode);
+        //Joining the remaining nodes
+        Object[] arr = joinAll(nodes, this.queryNode);
+        multiplyCount += (int) arr[0];
+        nodes = (LinkedList<NetworkNode>) arr[1];
 
-        return null;
+
+        Object[] arrFinal = normalize(nodes, this.queryNode, this.queryValue);
+        double result = (double) arrFinal[0];
+        result *= Math.pow(10, 5);
+        result = Math.round(result);
+        result /= Math.pow(10, 5);
+        additionCount += (int) arrFinal[1];
+        String ret = (result + "," + additionCount + "," + multiplyCount);
+        return ret;
     }
 
-    public static Object[] normalize (LinkedList<NetworkNode> nodes, NetworkNode queryNode)
-    {
+    public static Object[] normalize(LinkedList<NetworkNode> nodes, NetworkNode queryNode, String queryValue) {
+        //the list received consists of only one node (necessarily)
         int additionCount = 0;
         String[][] keys = nodes.get(0).getTableKeys();
         double[] values = nodes.get(0).getTableValues();
         int indOfQuery = Utilities.indexOf(keys[0], queryNode.getName());
-        double sum = 0;
-
         double[] newValues = new double[queryNode.getOutcomes().length];
+        double totalSum = 0;
 
-        for (int i = 0; i < queryNode.getOutcomes().length; i++)
-        {
-            int currValue = 0;
-            for(int j = 1; j < keys.length; j++)
-            {
-                if (keys[j][indOfQuery].equals(queryNode.getOutcomes()[i]))
-                {
-                    currValue += values[j-1];
+        for (int i = 0; i < queryNode.getOutcomes().length; i++) {
+            double[] arr =  findAllRecordsWhereOutcome(keys, values, indOfQuery, queryNode.getOutcomes()[i]);
+            if (arr.length != 1) { //Always == 1!!!!!!!!!!!!!!!!!!
+                double currSum = arr[0];
+                for (int j = 1; j < arr.length; j++) {
+                    currSum += arr[j];
                     additionCount++;
                 }
+                newValues[i] = currSum;
+                totalSum += currSum;
             }
-            newValues[i] = currValue;
-            sum += currValue;
+            else {
+                newValues[i] = arr[0];
+                totalSum += arr[0];
+                additionCount++;
+            }
+
+//            int currValue = 0;
+//            for (int j = 1; j < keys.length; j++) {
+//                if (keys[j][indOfQuery].equals(queryNode.getOutcomes()[i])) {
+//                    currValue += values[j - 1];
+//                    additionCount++;
+//                }
+//            }
+//            additionCount--;
+//            newValues[i] = currValue;
+//            sum += currValue;
         }
 
-        for(int i = 0; i < newValues.length; i++) //normalizing
+        for (int i = 0; i < newValues.length; i++) //normalizing
         {
-            newValues[i] = newValues[i]/sum;
+            newValues[i] = newValues[i] / totalSum;
         }
 
 
-
+        int indexOfQueryOutcome = Utilities.indexOf(queryNode.getOutcomes(), queryValue);
         Object[] arr = new Object[2];
-//        arr[0] =
+        arr[0] = newValues[indexOfQueryOutcome];
+        arr[1] = additionCount;
+        return arr;
+    }
 
+    public static double[] findAllRecordsWhereOutcome(String[][] keys, double[] values, int indexOfQuery,
+                                                      String outcome) {
+        LinkedList<Double> ret = new LinkedList<>();
+        for (int i = 1; i < keys.length; i++) {
+            if (keys[i][indexOfQuery].equals(outcome)) {
+                ret.addLast(values[i - 1]);
+            }
+        }
+        return Utilities.linkedListToDoubleArray(ret);
     }
 
     /**
@@ -176,7 +208,7 @@ public class VariableElimination implements Query {
     /**
      * A function to join all factors mentioning a node (specified by "by"). Returns the joined factor keys and values,
      * the number of multiplication operations performed, as well as the list of nodes due to some nodes (all which
-     * were used in the joining) were removed
+     * were used in the joining) being removed
      *
      * @param nodes LinkedList of nodes
      * @param by    A node by which to join
@@ -367,10 +399,12 @@ public class VariableElimination implements Query {
      */
     public static LinkedList<NetworkNode> ancestorTraverse(LinkedList<NetworkNode> nodes, NetworkNode currNode,
                                                            LinkedList<NetworkNode> areAncestors) {
-        if (currNode.getParents().length == 0 || Utilities.contains(nodes, currNode)) {
+        if (!Utilities.contains(areAncestors, currNode)) {
+            areAncestors.addLast(currNode);
+        }
+        if (currNode.getParents().length == 0) {
             return areAncestors;
         }
-        areAncestors.addLast(currNode);
         for (int i = 0; i < currNode.getParents().length; i++) {
             areAncestors = ancestorTraverse(nodes, currNode.getParents()[i], areAncestors);
         }
@@ -392,6 +426,7 @@ public class VariableElimination implements Query {
             boolean flagNotQuery = !queryNode.equals(nodes.get(i));
             if (flagNodeGiven && flagNotQuery && flagBayesBall) {
                 nodes.remove(i);
+                i--;
             }
         }
         return nodes;
@@ -415,8 +450,8 @@ public class VariableElimination implements Query {
                 }
             }
         }
-        nodes = sortFactors(nodes);
-        return nodes;
+        ret = sortFactors(ret);
+        return ret;
     }
 
     /**
@@ -432,7 +467,7 @@ public class VariableElimination implements Query {
         for (int i = 0; i < nodes.size(); i++) {
             int minNodeInd = i;
             int minSize = nodes.get(i).getTableKeys().length;
-            for (int j = 1; j < nodes.size() - 1; j++) {
+            for (int j = i + 1; j < nodes.size(); j++) {
                 if (nodes.get(j).getTableKeys().length < minSize) {
                     minNodeInd = j;
                     minSize = nodes.get(j).getTableKeys().length;
@@ -452,7 +487,7 @@ public class VariableElimination implements Query {
                     nodes = sortByASCII(nodes, beginningOfSameSizeInd, i - 1);
                 }
                 sameSizeNum = 1;
-                beginningOfSameSizeInd = i + 1;
+                beginningOfSameSizeInd = i;
             }
         }
         if (sameSizeNum > 1) {
@@ -475,10 +510,11 @@ public class VariableElimination implements Query {
         for (int i = startInd; i <= endInd; i++) {
             int minNodeInd = i;
             int minSize = Utilities.asciiSize(nodes.get(i).getTableKeys()[0]);
-            for (int j = 1; j < nodes.size() - 1; j++) {
-                if (nodes.get(j).getTableKeys().length < minSize) {
+            for (int j = i + 1; j <= endInd; j++) {
+                int currSize = Utilities.asciiSize(nodes.get(j).getTableKeys()[0]);
+                if (currSize < minSize) {
                     minNodeInd = j;
-                    minSize = Utilities.asciiSize(nodes.get(j).getTableKeys()[0]);
+                    minSize = currSize;
                 }
             }
             nodes = swap(nodes, i, minNodeInd);
@@ -495,13 +531,13 @@ public class VariableElimination implements Query {
      * @return the list with swapped nodes
      */
     public static LinkedList<NetworkNode> swap(LinkedList<NetworkNode> nodes, int i, int j) {
-        NetworkNode temp = nodes.get(i);
-        nodes.set(i, nodes.get(j));
-        nodes.set(j, temp);
-        return nodes;
+        NetworkNode[] arr = Utilities.linkedListToArrayNodes(nodes);
+        NetworkNode temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+        return Utilities.arrToLinkedListNodes(arr);
     }
 }
-
 
 
 
