@@ -72,47 +72,29 @@ public class VariableElimination implements Query {
         String[][] keys = nodes.get(0).getTableKeys();
         double[] values = nodes.get(0).getTableValues();
         int indOfQuery = Utilities.indexOf(keys[0], queryNode.getName());
-        double[] newValues = new double[queryNode.getOutcomes().length];
-        double totalSum = 0;
+        double sum = 0;
+        int wantedInd = 0;
 
-        for (int i = 0; i < queryNode.getOutcomes().length; i++) {
-            double[] arr =  findAllRecordsWhereOutcome(keys, values, indOfQuery, queryNode.getOutcomes()[i]);
-            if (arr.length != 1) { //Always == 1!!!!!!!!!!!!!!!!!!
-                double currSum = arr[0];
-                for (int j = 1; j < arr.length; j++) {
-                    currSum += arr[j];
-                    additionCount++;
-                }
-                newValues[i] = currSum;
-                totalSum += currSum;
-            }
-            else {
-                newValues[i] = arr[0];
-                totalSum += arr[0];
-                additionCount++;
-            }
-
-//            int currValue = 0;
-//            for (int j = 1; j < keys.length; j++) {
-//                if (keys[j][indOfQuery].equals(queryNode.getOutcomes()[i])) {
-//                    currValue += values[j - 1];
-//                    additionCount++;
-//                }
-//            }
-//            additionCount--;
-//            newValues[i] = currValue;
-//            sum += currValue;
-        }
-
-        for (int i = 0; i < newValues.length; i++) //normalizing
+        for (int i = 0; i < values.length; i++)
         {
-            newValues[i] = newValues[i] / totalSum;
+            sum += values[i];
+            additionCount++;
         }
-
-
-        int indexOfQueryOutcome = Utilities.indexOf(queryNode.getOutcomes(), queryValue);
+        additionCount--;
+        for (int i = 0; i < values.length; i++) //normalizing
+        {
+            values[i] = values[i] / sum;
+        }
+        for (int i = 1; i < keys.length; i++)
+        {
+            if (keys[i][indOfQuery].equals(queryValue))
+            {
+                wantedInd = i;
+                break;
+            }
+        }
         Object[] arr = new Object[2];
-        arr[0] = newValues[indexOfQueryOutcome];
+        arr[0] = values[wantedInd-1];
         arr[1] = additionCount;
         return arr;
     }
