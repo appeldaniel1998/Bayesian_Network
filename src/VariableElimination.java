@@ -2,7 +2,7 @@ import java.util.LinkedList;
 
 public class VariableElimination implements Query {
 
-    private final NetworkNode queryNode;
+    private NetworkNode queryNode;
     private final String queryValue;
     private final NetworkNode[] givenNodes;
     private final String[] givenValues;
@@ -19,14 +19,23 @@ public class VariableElimination implements Query {
 
     @Override
     public String resultForQuery(LinkedList<NetworkNode> nodes, String XMLFilepath) {
+
         nodes = XmlFileParse.xmlParser(XMLFilepath);
-        nodes = siphoningNotDependantNodes(nodes);
-        nodes = siphoningNotAncestorNodes(nodes);
-        nodes = removeAllIrrelevantValues(nodes);
+        double answerExists = answerAlreadyInFactors(nodes);
+        if (answerExists != -1.0) {
+            return answerExists + ",0,0";
+        }
+        nodes = this.siphoningNotDependantNodes(nodes);
+        nodes = this.siphoningNotAncestorNodes(nodes);
+        nodes = this.removeAllIrrelevantValues(nodes);
         int multiplyCount = 0;
         int additionCount = 0;
 
+
         for (int i = 0; i < this.readingOrder.length; i++) { //iterating over all hidden values
+            if (!Utilities.contains(nodes, readingOrder[i].getName())) {
+                continue;
+            }
             Object[] arr = joinAll(nodes, readingOrder[i]);
             multiplyCount += (int) arr[0];
             nodes = (LinkedList<NetworkNode>) arr[1];
@@ -38,8 +47,12 @@ public class VariableElimination implements Query {
             String[][] currKeys = (String[][]) arr2[0];
             double[] currValues = (double[]) arr2[1];
             additionCount += (int) arr2[2];
-            nodes.getLast().setTableKeys(currKeys);
-            nodes.getLast().setTableValues(currValues);
+            if (currValues.length != 1) {
+                nodes.getLast().setTableKeys(currKeys);
+                nodes.getLast().setTableValues(currValues);
+            } else {
+                nodes.removeLast();
+            }
             //Elimination handling up to here: parsing and assignment of the corrected
             System.out.println("finished " + i);
         }
@@ -66,6 +79,78 @@ public class VariableElimination implements Query {
         return ret;
     }
 
+    /**
+     * Searching for table with all the given and query nodes and values, without any others to return to the user
+     * without further calculations and the VE algorithm
+     *
+     * @param lst list of Network nodes in addition to "this"
+     * @return the value requested if exists, otherwise -1 (probability cannot be -1)
+     */
+    public double answerAlreadyInFactors(LinkedList<NetworkNode> lst) {
+        String[] givenNodeNames = new String[this.givenNodes.length];
+        for (int i = 0; i < givenNodeNames.length; i++) { //creating a String array of names of given nodes
+            givenNodeNames[i] = this.givenNodes[i].getName();
+        }
+
+        for (int i = 0; i < lst.size(); i++) {
+            boolean flag = true;
+            String[] currFactorKeysNames = lst.get(i).getTableKeys()[0];
+            double[] currFactorValues = lst.get(i).getTableValues();
+
+            for (int j = 0; j < currFactorKeysNames.length; j++) {
+                if (!(Utilities.contains(givenNodeNames, currFactorKeysNames[j]) ||
+                        currFactorKeysNames[j].equals(this.queryNode.getName()))) {
+                    flag = false;
+                    break;
+                }
+            }
+
+            if (flag) {
+                return this.getValuesFromTable(lst.get(i).getTableKeys(), currFactorValues, givenNodeNames);
+            } else {
+                return -1.0;
+            }
+        }
+        return -1.0;
+    }
+
+    /**
+     * Function to return the value of where all given and query nodes match to the desired in a specific table of
+     * keys + values
+     *
+     * @param keys       keys of said table
+     * @param values     values of said table
+     * @param givenNames names of given nodes
+     * @return double value of probability or -1 if not found (shouldn't occur)
+     */
+    public double getValuesFromTable(String[][] keys, double[] values, String[] givenNames) {
+        for (int i = 1; i < keys.length; i++) {
+            boolean flag = true;
+            if (this.givenNodes.length != 0) {
+                for (int j = 0; j < keys[i].length; j++) {
+                    int indexOfNodeInNames = Utilities.indexOf(givenNames, keys[0][j]);
+                    if (!this.givenValues[indexOfNodeInNames].equals(keys[i][j])) {
+                        flag = false;
+                        break;
+                    }
+                }
+            } else {
+                if (keys[0].length != 1) {
+                    flag = false;
+                    break;
+                }
+                if (keys[i][0].equals(this.queryValue)) {
+                    return values[i - 1];
+                }
+            }
+            if (flag) {
+                return values[i - 1];
+            }
+        }
+        return -1.0;
+    }
+
+
     public static Object[] normalize(LinkedList<NetworkNode> nodes, NetworkNode queryNode, String queryValue) {
         //the list received consists of only one node (necessarily)
         int additionCount = 0;
@@ -75,8 +160,7 @@ public class VariableElimination implements Query {
         double sum = 0;
         int wantedInd = 0;
 
-        for (int i = 0; i < values.length; i++)
-        {
+        for (int i = 0; i < values.length; i++) {
             sum += values[i];
             additionCount++;
         }
@@ -85,29 +169,16 @@ public class VariableElimination implements Query {
         {
             values[i] = values[i] / sum;
         }
-        for (int i = 1; i < keys.length; i++)
-        {
-            if (keys[i][indOfQuery].equals(queryValue))
-            {
+        for (int i = 1; i < keys.length; i++) {
+            if (keys[i][indOfQuery].equals(queryValue)) {
                 wantedInd = i;
                 break;
             }
         }
         Object[] arr = new Object[2];
-        arr[0] = values[wantedInd-1];
+        arr[0] = values[wantedInd - 1];
         arr[1] = additionCount;
         return arr;
-    }
-
-    public static double[] findAllRecordsWhereOutcome(String[][] keys, double[] values, int indexOfQuery,
-                                                      String outcome) {
-        LinkedList<Double> ret = new LinkedList<>();
-        for (int i = 1; i < keys.length; i++) {
-            if (keys[i][indexOfQuery].equals(outcome)) {
-                ret.addLast(values[i - 1]);
-            }
-        }
-        return Utilities.linkedListToDoubleArray(ret);
     }
 
     /**
@@ -364,6 +435,7 @@ public class VariableElimination implements Query {
      */
     public LinkedList<NetworkNode> siphoningNotAncestorNodes(LinkedList<NetworkNode> nodes) {
         LinkedList<NetworkNode> areAncestors = new LinkedList<>();
+        this.queryNode = nodes.get(Utilities.indexOf(nodes, this.queryNode));
         areAncestors = ancestorTraverse(nodes, this.queryNode, areAncestors);
         for (int i = 0; i < this.givenNodes.length; i++) {
             areAncestors = ancestorTraverse(nodes, this.givenNodes[i], areAncestors);
@@ -402,6 +474,8 @@ public class VariableElimination implements Query {
      */
     public LinkedList<NetworkNode> siphoningNotDependantNodes(LinkedList<NetworkNode> nodes) {
         for (int i = 0; i < nodes.size(); i++) {
+            queryNode.emptyTimesVisited();
+            Utilities.zeroToAllTimesVisited(givenNodes);
             BayesBallQuery temp = new BayesBallQuery(queryNode, nodes.get(i), givenNodes, givenValues);
             boolean flagBayesBall = temp.resultForQuery(nodes, null).equals("yes");
             boolean flagNodeGiven = !Utilities.contains(givenNodes, nodes.get(i));

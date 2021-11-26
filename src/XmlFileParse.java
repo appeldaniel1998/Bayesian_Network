@@ -11,7 +11,7 @@ public class XmlFileParse {
     public static LinkedList<NetworkNode> xmlParser(String filePath) {
 
         LinkedList<String> ls = Utilities.fileReaderToLinkedList(filePath);
-        LinkedList<NetworkNode> nodes = new LinkedList<NetworkNode>();
+        LinkedList<NetworkNode> nodes = new LinkedList<>();
         int i;
         int startIndexVars = 0;
         //finding index of line with the first <VARIABLE> tag (should set startIndexVars to 1 if XML is as expected)

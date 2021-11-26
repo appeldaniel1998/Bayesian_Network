@@ -4,7 +4,7 @@ public class TextFileParse {
 
     public static Object[] textParse(String filePath) {
         LinkedList<String> ls = Utilities.fileReaderToLinkedList(filePath);
-        LinkedList<NetworkNode> nodes = XmlFileParse.xmlParser("src/Assignment/" + ls.get(0));
+        LinkedList<NetworkNode> nodes = XmlFileParse.xmlParser("src/"+ls.get(0));
         initChildrenOfAllNodes(nodes);
         LinkedList<Query> finalQueries = new LinkedList<Query>();
 
@@ -43,9 +43,14 @@ public class TextFileParse {
 
         NetworkNode queryNode = Utilities.searchNode(nodes, queryNodeAndValue[0]);
 
-        Object[] arr = givenListParse(nodes, splitByDefinition[1]);
-        NetworkNode[] givenNodesArr = (NetworkNode[]) arr[0];
-        String[] givenValuesArr = (String[]) arr[1];
+        Object[] arr;
+        NetworkNode[] givenNodesArr = new NetworkNode[0];
+        String[] givenValuesArr = new String[0];
+        if (splitByDefinition.length > 1) {
+            arr = givenListParse(nodes, splitByDefinition[1]);
+            givenNodesArr = (NetworkNode[]) arr[0];
+            givenValuesArr = (String[]) arr[1];
+        }
 
 
         //Reading order Parse:

@@ -114,7 +114,7 @@ public class BayesBallQuery implements Query {
 
     private boolean goToParents(LinkedList<NetworkNode> nodes, NetworkNode currentNode) {
         NetworkNode[] parents = currentNode.getParents();
-        parents = Utilities.zeroToAllTimesVisited(parents);
+//        parents = Utilities.zeroToAllTimesVisited(parents);
         if (parents.length == 0) return true;
         boolean ret = true;
         for (int i = 0; i < parents.length; i++) {
@@ -131,7 +131,7 @@ public class BayesBallQuery implements Query {
 
     private boolean goToChildren(LinkedList<NetworkNode> nodes, NetworkNode currentNode) {
         NetworkNode[] children = currentNode.getChildren();
-        children = Utilities.zeroToAllTimesVisited(children);
+//        children = Utilities.zeroToAllTimesVisited(children);
         if (children.length == 0) return true;
         boolean ret = true;
         for (int i = 0; i < children.length; i++) {

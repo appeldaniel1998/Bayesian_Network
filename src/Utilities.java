@@ -154,6 +154,7 @@ public class Utilities {
         }
         return nodes;
     }
+
     public static NetworkNode[] zeroToAllTimesVisited(NetworkNode[] nodes) {
         for (int i = 0; i < nodes.length; i++) {
             nodes[i].emptyTimesVisited();
@@ -178,6 +179,20 @@ public class Utilities {
     }
 
     /**
+     * Returning the index of the Node in the list of nodes. If such doesn't exist, return -1.
+     *
+     * @param lst list of Nodes
+     * @param node Network Node
+     * @return index of node in lst
+     */
+    public static int indexOf(LinkedList<NetworkNode> lst, NetworkNode node) {
+        for (int i = 0; i < lst.size(); i++) {
+            if (lst.get(i).equals(node)) return i;
+        }
+        return -1;
+    }
+
+    /**
      * Implementing equals for two arrays of Strings
      *
      * @param arr1 first array
@@ -189,7 +204,7 @@ public class Utilities {
             return false;
         } else {
             for (int i = 0; i < arr1.length; i++) {
-                if (arr1[i] != arr2[i]) {
+                if (!arr1[i].equals(arr2[i])) {
                     return false;
                 }
             }
@@ -206,8 +221,7 @@ public class Utilities {
     public static int asciiSize(String[] arr) {
         int sum = 0;
         for (int i = 0; i < arr.length; i++) {
-            for (int j = 0; j < arr[i].length(); j++)
-            {
+            for (int j = 0; j < arr[i].length(); j++) {
                 sum += (int) arr[i].charAt(j);
             }
         }
@@ -216,18 +230,16 @@ public class Utilities {
 
     /**
      * Removing the element in index ind from the array and returning it.
+     *
      * @param arr array of Strings
      * @param ind index to remove
      * @return corrected array
      */
-    public static String[] removeElement (String[] arr, int ind)
-    {
-        String[] ret = new String[arr.length-1];
+    public static String[] removeElement(String[] arr, int ind) {
+        String[] ret = new String[arr.length - 1];
         int retInd = 0;
-        for (int i = 0; i < arr.length; i++)
-        {
-            if (i != ind)
-            {
+        for (int i = 0; i < arr.length; i++) {
+            if (i != ind) {
                 ret[retInd++] = arr[i];
             }
         }
@@ -236,39 +248,39 @@ public class Utilities {
 
     /**
      * Returns true if a linked list of String[] contains a String[] as passed in arr
+     *
      * @param lst LinkedList<String[]>
      * @param arr String[]
      * @return corresponding boolean value
      */
-    public static boolean contains (LinkedList<String[]> lst, String[] arr)
-    {
-        for (int i = 0; i < lst.size(); i++)
-        {
-            if (equals(lst.get(i), arr))
-            {
+    public static boolean contains(LinkedList<String[]> lst, String[] arr) {
+        for (int i = 0; i < lst.size(); i++) {
+            if (equals(lst.get(i), arr)) {
                 return true;
             }
         }
         return false;
     }
 
-    public static boolean contains (LinkedList<NetworkNode> lst, NetworkNode node)
-    {
-        for (int i = 0; i < lst.size(); i++)
-        {
-            if (node.equals(lst.get(i)))
-            {
+    public static boolean contains(LinkedList<NetworkNode> lst, NetworkNode node) {
+        for (int i = 0; i < lst.size(); i++) {
+            if (node.equals(lst.get(i))) {
                 return true;
             }
         }
         return false;
     }
 
-    public static LinkedList<NetworkNode> arrToLinkedListNodes(NetworkNode[] arr)
-    {
+    public static boolean contains(LinkedList<NetworkNode> lst, String str) {
+        for (int i = 0; i < lst.size(); i++) {
+            if (contains(lst.get(i).getTableKeys()[0], str)) return true;
+        }
+        return false;
+    }
+
+    public static LinkedList<NetworkNode> arrToLinkedListNodes(NetworkNode[] arr) {
         LinkedList<NetworkNode> ret = new LinkedList<>();
-        for (int i = 0; i < arr.length; i++)
-        {
+        for (int i = 0; i < arr.length; i++) {
             ret.addLast(arr[i]);
         }
         return ret;
