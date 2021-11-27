@@ -42,9 +42,9 @@ public class XmlFileParse {
         // first line passed is the line with the first <VARIABLE> tag
 
         String name = "";
-        LinkedList<String> outcomes = new LinkedList<String>();
+        LinkedList<String> outcomes = new LinkedList<>();
 
-        LinkedList<NetworkNode> nodes = new LinkedList<NetworkNode>();
+        LinkedList<NetworkNode> nodes = new LinkedList<>();
 
         for (int i = firstIndex + 1; i < lastIndex - 1; i++) { // Iterating over the lines (some iteration over them happens
             // inside the loop
@@ -82,7 +82,7 @@ public class XmlFileParse {
 
         String queryStr = ""; // to be the name of the node
         NetworkNode queryNode = null; //init of the node to be worked on
-        LinkedList<NetworkNode> givenNodes = new LinkedList<NetworkNode>(); //init of parents LinkedList of nodes
+        LinkedList<NetworkNode> givenNodes = new LinkedList<>(); //init of parents LinkedList of nodes
         double[] arrDou = new double[0]; //init of array to be table of the node
 
         for (int i = firstIndex; i < allLines.size(); i++) { //iterating over the lines. Some iteration happens inside the loop.

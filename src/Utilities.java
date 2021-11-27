@@ -1,5 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Scanner;
 
@@ -13,7 +15,7 @@ public class Utilities {
      * @return LinkedList of Strings
      */
     public static LinkedList<String> fileReaderToLinkedList(String str) {
-        LinkedList<String> ls = new LinkedList<String>();
+        LinkedList<String> ls = new LinkedList<>();
         Scanner sc = null;
         try {
             sc = new Scanner(new File(str));
@@ -24,6 +26,21 @@ public class Utilities {
             ls.add(sc.nextLine());
         }
         return ls;
+    }
+
+    public static void toFile(String[] arr, String filepath)
+    {
+        try {
+            FileWriter fw = new FileWriter(filepath);
+            for (int i = 0; i < arr.length; i++)
+            {
+                fw.write(arr[i]+"\n");
+            }
+            fw.close();
+        } catch (IOException e) {
+            System.err.println("While writing to file, an error occurred.");
+            e.printStackTrace();
+        }
     }
 
     /**

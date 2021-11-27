@@ -54,7 +54,6 @@ public class VariableElimination implements Query {
                 nodes.removeLast();
             }
             //Elimination handling up to here: parsing and assignment of the corrected
-            System.out.println("finished " + i);
         }
         /*
         now the nodes contain no hidden factors. We need to join the rest of the factors. The factors that may still
@@ -594,14 +593,3 @@ public class VariableElimination implements Query {
         return Utilities.arrToLinkedListNodes(arr);
     }
 }
-
-
-
-
-
-
-
-
-
-
-

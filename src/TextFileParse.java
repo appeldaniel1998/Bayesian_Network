@@ -4,9 +4,9 @@ public class TextFileParse {
 
     public static Object[] textParse(String filePath) {
         LinkedList<String> ls = Utilities.fileReaderToLinkedList(filePath);
-        LinkedList<NetworkNode> nodes = XmlFileParse.xmlParser("src/"+ls.get(0));
+        LinkedList<NetworkNode> nodes = XmlFileParse.xmlParser(ls.get(0));
         initChildrenOfAllNodes(nodes);
-        LinkedList<Query> finalQueries = new LinkedList<Query>();
+        LinkedList<Query> finalQueries = new LinkedList<>();
 
 
         for (int i = 1; i < ls.size(); i++) {
@@ -16,14 +16,13 @@ public class TextFileParse {
             if (sub.equals("P(")) {
                 finalQueries.addLast(varEliminationParse(line, nodes));
             } else {
-                Query q = BayesParse(line, nodes);
                 finalQueries.addLast(BayesParse(line, nodes));
             }
         }
         Object[] ret = new Object[3];
         ret[0] = nodes;
         ret[1] = finalQueries;
-        ret[2] = "src/Assignment/" + ls.get(0);
+        ret[2] = ls.get(0);
         return ret;
     }
 
@@ -54,7 +53,14 @@ public class TextFileParse {
 
 
         //Reading order Parse:
-        String orderOfReadingString = line.substring(indexCloseBracket + 2);
+        String orderOfReadingString;
+        try {
+            orderOfReadingString = line.substring(indexCloseBracket + 2);
+        }
+        catch (StringIndexOutOfBoundsException e) // in case there are no hidden variables to read
+        {
+            orderOfReadingString = "";
+        }
         String readingOrderStrings[] = orderOfReadingString.split("-");
         NetworkNode[] readingOrder = new NetworkNode[readingOrderStrings.length];
         for (int j = 0; j < readingOrder.length; j++) {
@@ -84,8 +90,8 @@ public class TextFileParse {
     }
 
     private static Object[] givenListParse(LinkedList<NetworkNode> nodes, String line) {
-        LinkedList<NetworkNode> givenNodes = new LinkedList<NetworkNode>();
-        LinkedList<String> givenValues = new LinkedList<String>();
+        LinkedList<NetworkNode> givenNodes = new LinkedList<>();
+        LinkedList<String> givenValues = new LinkedList<>();
 
         NetworkNode[] givenNodesArr = new NetworkNode[0];
         String[] givenValuesArr = new String[0];
