@@ -103,6 +103,12 @@ public class VariableElimination implements Query {
                     break;
                 }
             }
+            for (int j = 0; j < givenNodeNames.length; j++) {
+                if (!(Utilities.contains(currFactorKeysNames, givenNodeNames[j]))) {
+                    flag = false;
+                    break;
+                }
+            }
 
             if (flag) {
                 return this.getValuesFromTable(lst.get(i).getTableKeys(), currFactorValues, givenNodeNames);
