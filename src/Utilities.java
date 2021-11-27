@@ -28,13 +28,11 @@ public class Utilities {
         return ls;
     }
 
-    public static void toFile(String[] arr, String filepath)
-    {
+    public static void toFile(String[] arr, String filepath) {
         try {
             FileWriter fw = new FileWriter(filepath);
-            for (int i = 0; i < arr.length; i++)
-            {
-                fw.write(arr[i]+"\n");
+            for (int i = 0; i < arr.length; i++) {
+                fw.write(arr[i] + "\n");
             }
             fw.close();
         } catch (IOException e) {
@@ -198,7 +196,7 @@ public class Utilities {
     /**
      * Returning the index of the Node in the list of nodes. If such doesn't exist, return -1.
      *
-     * @param lst list of Nodes
+     * @param lst  list of Nodes
      * @param node Network Node
      * @return index of node in lst
      */
@@ -290,7 +288,9 @@ public class Utilities {
 
     public static boolean contains(LinkedList<NetworkNode> lst, String str) {
         for (int i = 0; i < lst.size(); i++) {
-            if (contains(lst.get(i).getTableKeys()[0], str)) return true;
+            if (contains(lst.get(i).getTableKeys()[0], str)) {
+                return true;
+            }
         }
         return false;
     }
