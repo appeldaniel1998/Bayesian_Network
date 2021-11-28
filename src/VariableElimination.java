@@ -494,9 +494,7 @@ public class VariableElimination implements Query {
      * @return siphoned Linked List of nodes
      */
     public LinkedList<NetworkNode> siphoningNotDependantNodes(LinkedList<NetworkNode> nodes) {
-        for (int i = 0; i < nodes.size(); i++) {
-            queryNode.emptyTimesVisited();
-            Utilities.zeroToAllTimesVisited(givenNodes);
+         for (int i = 0; i < nodes.size(); i++) {
             BayesBallQuery temp = new BayesBallQuery(queryNode, nodes.get(i), givenNodes, givenValues);
             boolean flagBayesBall = temp.resultForQuery(nodes, null).equals("yes");
             boolean flagNodeGiven = !Utilities.contains(givenNodes, nodes.get(i));

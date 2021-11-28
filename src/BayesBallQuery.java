@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.LinkedList;
 
 public class BayesBallQuery implements Query {
@@ -10,47 +11,10 @@ public class BayesBallQuery implements Query {
 
     public BayesBallQuery(NetworkNode node1, NetworkNode node2, NetworkNode[] givenNodes, String[] givenValues) {
         this.src = node1;
-        this.src.emptyTimesVisited();
         this.dest = node2;
-        this.dest.emptyTimesVisited();
         this.givenNodes = givenNodes;
-        Utilities.zeroToAllTimesVisited(this.givenNodes);
         this.givenValues = givenValues;
     }
-
-    public NetworkNode getQuerySrc() {
-        return src;
-    }
-
-    public void setQuerySrc(NetworkNode queryNode1) {
-        this.src = queryNode1;
-    }
-
-    public NetworkNode getQueryDest() {
-        return dest;
-    }
-
-    public void setQueryDest(NetworkNode queryNode2) {
-        this.dest = queryNode2;
-    }
-
-    public NetworkNode[] getGivenNodes() {
-        return givenNodes;
-    }
-
-    public void setGivenNodes(NetworkNode[] givenNodes) {
-        this.givenNodes = givenNodes;
-    }
-
-    public String[] getGivenValues() {
-        return givenValues;
-    }
-
-    public void setGivenValues(String[] givenValues) {
-        this.givenValues = givenValues;
-    }
-
-
     /**
      * Func will be done recursively:
      * Stop sings and return a specific value:
@@ -75,14 +39,19 @@ public class BayesBallQuery implements Query {
      */
     @Override
     public String resultForQuery(LinkedList<NetworkNode> nodes, String XMLFilepath) {
-        //answer the question: are the nodes conditionally independent?
-        nodes = Utilities.zeroToAllTimesVisited(nodes);
+        //answers the question: are the nodes conditionally independent?
+
+        HashMap<String, Integer> timesVisited = new HashMap<>();
+        for (int i = 0; i < nodes.size(); i++) {
+            timesVisited.put(nodes.get(i).getName(), 0);
+        }
         if (this.srcOrDestGiven()) return "yes"; //nodes conditionally independent if one of them is given
-        if (this.conditionallyIndependent(nodes, ANY, this.src, true)) return "yes";
+        if (this.conditionallyIndependent(nodes, ANY, this.src, true, timesVisited)) return "yes";
         else return "no";
     }
 
-    private boolean conditionallyIndependent(LinkedList<NetworkNode> nodes, int canGoTo, NetworkNode currentNode, boolean isFirstIter) {
+    private boolean conditionallyIndependent(LinkedList<NetworkNode> nodes, int canGoTo, NetworkNode currentNode,
+                                             boolean isFirstIter, HashMap<String, Integer> timesVisited) {
         // returns true if the nodes are independent: a path was not found
         // returns false otherwise: (path was found)
 
@@ -95,26 +64,25 @@ public class BayesBallQuery implements Query {
             return true;
         }
 
-        if (currentNode.getTimesVisited() >= 2) { //stop condition - a path is currently not found
+        if (timesVisited.get(currentNode.getName()) >= 2) { //stop condition - a path is currently not found
             return true;
         }
-        currentNode.addTimesVisited();
+        timesVisited.put(currentNode.getName(), timesVisited.get(currentNode.getName()) + 1);
 
         if (canGoTo == ANY) {
-            if (!this.goToParents(nodes, currentNode) || !this.goToChildren(nodes, currentNode)) return false;
+            if (!this.goToParents(nodes, currentNode, timesVisited) || !this.goToChildren(nodes, currentNode, timesVisited)) return false;
             else return true;
         }
         if (canGoTo == CHILDREN) {
-            return this.goToChildren(nodes, currentNode);
+            return this.goToChildren(nodes, currentNode, timesVisited);
         } else //canGoTo == PARENTS
         {
-            return this.goToParents(nodes, currentNode);
+            return this.goToParents(nodes, currentNode, timesVisited);
         }
     }
 
-    private boolean goToParents(LinkedList<NetworkNode> nodes, NetworkNode currentNode) {
+    private boolean goToParents(LinkedList<NetworkNode> nodes, NetworkNode currentNode, HashMap<String, Integer> timesVisited) {
         NetworkNode[] parents = currentNode.getParents();
-//        parents = Utilities.zeroToAllTimesVisited(parents);
         if (parents.length == 0) return true;
         boolean ret = true;
         for (int i = 0; i < parents.length; i++) {
@@ -122,24 +90,23 @@ public class BayesBallQuery implements Query {
             {
                 continue;
             } else {
-                ret = this.conditionallyIndependent(nodes, ANY, parents[i], false);
+                ret = this.conditionallyIndependent(nodes, ANY, parents[i], false, timesVisited);
             }
             if (!ret) break;
         }
         return ret;
     }
 
-    private boolean goToChildren(LinkedList<NetworkNode> nodes, NetworkNode currentNode) {
+    private boolean goToChildren(LinkedList<NetworkNode> nodes, NetworkNode currentNode, HashMap<String, Integer> timesVisited) {
         NetworkNode[] children = currentNode.getChildren();
-//        children = Utilities.zeroToAllTimesVisited(children);
         if (children.length == 0) return true;
         boolean ret = true;
         for (int i = 0; i < children.length; i++) {
             if (Utilities.contains(this.givenNodes, children[i])) //The parent node is coloured
             {
-                ret = this.conditionallyIndependent(nodes, PARENTS, children[i], false);
+                ret = this.conditionallyIndependent(nodes, PARENTS, children[i], false, timesVisited);
             } else {
-                ret = this.conditionallyIndependent(nodes, CHILDREN, children[i], false);
+                ret = this.conditionallyIndependent(nodes, CHILDREN, children[i], false, timesVisited);
             }
             if (!ret) break;
         }
