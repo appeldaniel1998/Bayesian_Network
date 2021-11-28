@@ -288,8 +288,12 @@ public class Utilities {
 
     public static boolean contains(LinkedList<NetworkNode> lst, String str) {
         for (int i = 0; i < lst.size(); i++) {
-            if (contains(lst.get(i).getTableKeys()[0], str)) {
-                return true;
+            try {
+                if (contains(lst.get(i).getTableKeys()[0], str)) {
+                    return true;
+                }
+            } catch (NullPointerException e) {
+                ;
             }
         }
         return false;
@@ -301,5 +305,12 @@ public class Utilities {
             ret.addLast(arr[i]);
         }
         return ret;
+    }
+
+    public static int firstNonNullTable(LinkedList<NetworkNode> nodes) {
+        for(int i = 0; i < nodes.size(); i++) {
+            if (nodes.get(i).getTableKeys() != null) return i;
+        }
+        return -1;
     }
 }

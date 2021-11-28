@@ -51,7 +51,9 @@ public class VariableElimination implements Query {
                 nodes.getLast().setTableKeys(currKeys);
                 nodes.getLast().setTableValues(currValues);
             } else {
-                nodes.removeLast();
+                nodes.getLast().setTableValues(null);
+                nodes.getLast().setTableKeys(null);
+                // nodes.removeLast();
             }
             //Elimination handling up to here: parsing and assignment of the corrected
         }
@@ -159,8 +161,9 @@ public class VariableElimination implements Query {
     public static Object[] normalize(LinkedList<NetworkNode> nodes, NetworkNode queryNode, String queryValue) {
         //the list received consists of only one node (necessarily)
         int additionCount = 0;
-        String[][] keys = nodes.get(0).getTableKeys();
-        double[] values = nodes.get(0).getTableValues();
+        int index = Utilities.firstNonNullTable(nodes);
+        String[][] keys = nodes.get(index).getTableKeys();
+        double[] values = nodes.get(index).getTableValues();
         int indOfQuery = Utilities.indexOf(keys[0], queryNode.getName());
         double sum = 0;
         int wantedInd = 0;
@@ -239,24 +242,30 @@ public class VariableElimination implements Query {
                 // (specifically of one given node)
                 String[][] currKeys = nodes.get(j).getTableKeys(); //current keys
                 double[] currValues = nodes.get(j).getTableValues(); //current values
-                if (Utilities.contains(currKeys[0], this.givenNodes[i].getName())) { //if such column name exists
-                    // (doest necessarily have to)
-                    LinkedList<String[]> newKeysLst = new LinkedList<>();
-                    LinkedList<Double> newValuesLst = new LinkedList<>();
-                    int indexOfNodeInKeys = Utilities.indexOf(currKeys[0], this.givenNodes[i].getName());
-                    newKeysLst.addLast(currKeys[0]); //adding first row (row of names of nodes) in any case
-                    for (int k = 1; k < currKeys.length; k++) {
-                        if (currKeys[k][indexOfNodeInKeys].equals(this.givenValues[i])) {
-                            newKeysLst.addLast(currKeys[k]);
-                            newValuesLst.addLast(currValues[k - 1]);
+                try {
+                    if (Utilities.contains(currKeys[0], this.givenNodes[i].getName())) { //if such column name exists
+                        // (doest necessarily have to)
+                        LinkedList<String[]> newKeysLst = new LinkedList<>();
+                        LinkedList<Double> newValuesLst = new LinkedList<>();
+                        int indexOfNodeInKeys = Utilities.indexOf(currKeys[0], this.givenNodes[i].getName());
+                        newKeysLst.addLast(currKeys[0]); //adding first row (row of names of nodes) in any case
+                        for (int k = 1; k < currKeys.length; k++) {
+                            if (currKeys[k][indexOfNodeInKeys].equals(this.givenValues[i])) {
+                                newKeysLst.addLast(currKeys[k]);
+                                newValuesLst.addLast(currValues[k - 1]);
+                            }
+                        }
+                        if (newValuesLst.size() == 1) { //removing 1 valued factors
+                            nodes.get(j).setTableKeys(null);
+                            nodes.get(j).setTableValues(null);
+                            // nodes.remove(j);
+                        } else {
+                            nodes.get(j).setTableKeys(Utilities.linkedListTo2DArray(newKeysLst));
+                            nodes.get(j).setTableValues(Utilities.linkedListToDoubleArray(newValuesLst));
                         }
                     }
-                    if (newValuesLst.size() == 1) { //removing 1 valued factors
-                        nodes.remove(j);
-                    } else {
-                        nodes.get(j).setTableKeys(Utilities.linkedListTo2DArray(newKeysLst));
-                        nodes.get(j).setTableValues(Utilities.linkedListToDoubleArray(newValuesLst));
-                    }
+                } catch (NullPointerException e) {
+                    ;
                 }
             }
         }
@@ -284,18 +293,18 @@ public class VariableElimination implements Query {
             currFactorValues = (double[]) temp[1];
             multiplyCount += (int) temp[2];
         }
-        LinkedList<NetworkNode> nodesAfterRemoval = new LinkedList<>();
         for (int i = 0; i < nodes.size(); i++) { //removing all nodes which were used to create the new factor.
             // All their information exists in the returned factor
-            if (!nodeFactorsToJoin.contains(nodes.get(i))) {
-                nodesAfterRemoval.addLast(nodes.get(i));
+            if (nodeFactorsToJoin.contains(nodes.get(i))) {
+                nodes.get(i).setTableValues(null);
+                nodes.get(i).setTableKeys(null);
             }
         }
         NetworkNode temp = new NetworkNode(currentFactorKeys, currFactorValues);
-        nodesAfterRemoval.addLast(temp);
+        nodes.addLast(temp);
         Object[] arr = new Object[2];
         arr[0] = multiplyCount;
-        arr[1] = nodesAfterRemoval;
+        arr[1] = nodes;
         return arr;
     }
 
@@ -445,7 +454,14 @@ public class VariableElimination implements Query {
         for (int i = 0; i < this.givenNodes.length; i++) {
             areAncestors = ancestorTraverse(nodes, this.givenNodes[i], areAncestors);
         }
-        return areAncestors;
+        for (int i = 0; i < nodes.size(); i++) {
+            if (!Utilities.contains(areAncestors, nodes.get(i))) {
+                nodes.get(i).setTableKeys(null);
+                nodes.get(i).setTableValues(null);
+            }
+        }
+        return nodes;
+
     }
 
     /**
@@ -486,8 +502,9 @@ public class VariableElimination implements Query {
             boolean flagNodeGiven = !Utilities.contains(givenNodes, nodes.get(i));
             boolean flagNotQuery = !queryNode.equals(nodes.get(i));
             if (flagNodeGiven && flagNotQuery && flagBayesBall) {
-                nodes.remove(i);
-                i--;
+                nodes.get(i).setTableKeys(null);
+                nodes.get(i).setTableValues(null);
+                // nodes.remove(i);
             }
         }
         return nodes;
@@ -503,12 +520,16 @@ public class VariableElimination implements Query {
     public static LinkedList<NetworkNode> findAllFactorsMentioning(LinkedList<NetworkNode> nodes, NetworkNode what) {
         LinkedList<NetworkNode> ret = new LinkedList<>();
         for (int i = 0; i < nodes.size(); i++) {
-            String[] names = nodes.get(i).getTableKeys()[0];
-            for (int j = 0; j < names.length; j++) {
-                if (names[j].equals(what.getName())) {
-                    ret.addLast(nodes.get(i));
-                    break;
+            try {
+                String[] names = nodes.get(i).getTableKeys()[0];
+                for (int j = 0; j < names.length; j++) {
+                    if (names[j].equals(what.getName())) {
+                        ret.addLast(nodes.get(i));
+                        break;
+                    }
                 }
+            } catch (NullPointerException e) {
+                ;
             }
         }
         ret = sortFactors(ret);
