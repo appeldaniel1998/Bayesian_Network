@@ -36,6 +36,10 @@ public class VariableElimination implements Query {
             if (!Utilities.contains(nodes, readingOrder[i].getName())) {
                 continue;
             }
+            int currReadingOrderIndex = Utilities.indexOf(nodes, readingOrder[i]);
+//            if (nodes.get(currReadingOrderIndex).getTableKeys() == null) {
+//                continue;
+//            }
             Object[] arr = joinAll(nodes, readingOrder[i]);
             multiplyCount += (int) arr[0];
             nodes = (LinkedList<NetworkNode>) arr[1];
