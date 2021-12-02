@@ -28,6 +28,13 @@ public class Utilities {
         return ls;
     }
 
+    /**
+     * Function to write to file from a String array. Each element of the array is a new line in the constructed
+     * text file. Filepath to write the file is specified when calling the function
+     *
+     * @param arr      array of Strings to write to file
+     * @param filepath filepath of the constructed file. Overrides any existing file with the same name in this location.
+     */
     public static void toFile(String[] arr, String filepath) {
         try {
             FileWriter fw = new FileWriter(filepath);
@@ -159,25 +166,6 @@ public class Utilities {
     }
 
     /**
-     * The times visited field in each node in the list is set to 0 for future use
-     *
-     * @param nodes
-     */
-    public static LinkedList<NetworkNode> zeroToAllTimesVisited(LinkedList<NetworkNode> nodes) {
-        for (int i = 0; i < nodes.size(); i++) {
-            nodes.get(i).emptyTimesVisited();
-        }
-        return nodes;
-    }
-
-    public static NetworkNode[] zeroToAllTimesVisited(NetworkNode[] nodes) {
-        for (int i = 0; i < nodes.length; i++) {
-            nodes[i].emptyTimesVisited();
-        }
-        return nodes;
-    }
-
-    /**
      * Returning the index of the str String in the arr array of Strings. If such doesn't exist, return -1.
      *
      * @param arr array of Strings
@@ -277,6 +265,13 @@ public class Utilities {
         return false;
     }
 
+    /**
+     * Returns true if a linked list of NetworkNode[] contains a node as passed in node
+     *
+     * @param lst  LinkedList<NetworkNode>
+     * @param node NetworkNode
+     * @return boolean
+     */
     public static boolean contains(LinkedList<NetworkNode> lst, NetworkNode node) {
         for (int i = 0; i < lst.size(); i++) {
             if (node.equals(lst.get(i))) {
@@ -286,6 +281,13 @@ public class Utilities {
         return false;
     }
 
+    /**
+     * Returns true if a linked list of NetworkNode[] contains a String inside its "keys" table (in its first line)
+     *
+     * @param lst LinkedList<NetworkNode>
+     * @param str string of query
+     * @return boolean
+     */
     public static boolean contains(LinkedList<NetworkNode> lst, String str) {
         for (int i = 0; i < lst.size(); i++) {
             try {
@@ -299,6 +301,12 @@ public class Utilities {
         return false;
     }
 
+    /**
+     * Transforming an array of nodes into a LinkedList of nodes
+     *
+     * @param arr Array of nodes
+     * @return LinkedList<NetworkNode>
+     */
     public static LinkedList<NetworkNode> arrToLinkedListNodes(NetworkNode[] arr) {
         LinkedList<NetworkNode> ret = new LinkedList<>();
         for (int i = 0; i < arr.length; i++) {
@@ -307,10 +315,42 @@ public class Utilities {
         return ret;
     }
 
-    public static int firstNonNullTable(LinkedList<NetworkNode> nodes) {
-        for(int i = 0; i < nodes.size(); i++) {
-            if (nodes.get(i).getTableKeys() != null) return i;
+    /**
+     * Returns the first non-null factor out of all (its index in the linked list of nodes)
+     *
+     * @param nodes     list of nodes (factors)
+     * @param queryNode name of node
+     * @return index of first non-null factor
+     */
+    public static int firstNonNullTable(LinkedList<NetworkNode> nodes, String queryNode) {
+        for (int i = 0; i < nodes.size(); i++) {
+            try {
+                String[] keys = nodes.get(i).getTableKeys()[0];
+                if (nodes.get(i).getTableKeys() != null && contains(keys, queryNode)) return i;
+            } catch (NullPointerException e) {
+                ;
+            }
         }
         return -1;
+    }
+
+    /**
+     * function to determine if entering a join-eliminate loop is worth it. Returns false if the query node is not
+     * in any of the current factors.
+     *
+     * @param nodes list of nodes
+     * @param query query name
+     * @return
+     */
+    public static boolean containsReadingOrderQuery(LinkedList<NetworkNode> nodes, String query) {
+        for (int i = 0; i < nodes.size(); i++) {
+            try {
+                String[] keys = nodes.get(i).getTableKeys()[0];
+                if (contains(keys, query)) return true;
+            } catch (NullPointerException e) {
+                ;
+            }
+        }
+        return false;
     }
 }

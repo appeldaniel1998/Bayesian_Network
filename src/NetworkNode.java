@@ -8,7 +8,6 @@ public class NetworkNode {
     private NetworkNode[] children;
     private double[] tableValues;
     private String[][] tableKeys;
-    private int timesVisited;
 
 
     public NetworkNode(String name, String[] outcomes) //string array of names of parents
@@ -17,30 +16,18 @@ public class NetworkNode {
         this.outcomes = outcomes;
         this.parents = new NetworkNode[0];
         this.children = new NetworkNode[0];
-        this.timesVisited = 0;
     }
 
     public NetworkNode(String[][] keys, double[] values) //instantiating an unimportant node with an important factor
     {
-        this.name = java.util.UUID.randomUUID().toString();; //a certain String that will never be a name of a real node
+        this.name = java.util.UUID.randomUUID().toString();
+        ; //a certain String that will never be a name of a real node
         this.tableKeys = keys;
         this.tableValues = values;
     }
 
     public String[] getOutcomes() {
         return outcomes;
-    }
-
-    public int getTimesVisited() {
-        return timesVisited;
-    }
-
-    public void addTimesVisited() {
-        this.timesVisited++;
-    }
-
-    public void emptyTimesVisited() {
-        this.timesVisited = 0;
     }
 
     public String getName() {
@@ -80,7 +67,7 @@ public class NetworkNode {
         this.tableValues = arr;
     }
 
-    public boolean equals(Object o) {
+    public boolean equals(Object o) { //equals iff names are the same
         if (!(o instanceof NetworkNode)) {
             return false;
         } else {
@@ -89,31 +76,39 @@ public class NetworkNode {
         }
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getName();
     }
 
-    public void scanForChildren(LinkedList<NetworkNode> nodes) {
-        ArrayList<NetworkNode> childrenLst = new ArrayList<NetworkNode>();
+    /**
+     * Setting the children array, with the assumption that all parent arrays are full and complete.
+     *
+     * @param nodes list of all nodes
+     */
+    public void scanForChildren(LinkedList<NetworkNode> nodes) { //setting the children
+        ArrayList<NetworkNode> childrenLst = new ArrayList<>();
 
-        for (int i = 0; i < nodes.size(); i++) {
+        for (int i = 0; i < nodes.size(); i++) { //for each node
             NetworkNode[] parentsArr = nodes.get(i).getParents();
-            for (int j = 0; j < parentsArr.length; j++) {
+            for (int j = 0; j < parentsArr.length; j++) { //if this node exists in any node as a parent, then it is a child
                 if (parentsArr[j].getName().equals(this.name)) {
                     childrenLst.add(nodes.get(i));
                     break;
                 }
             }
         }
-        NetworkNode[] childrenArr = new NetworkNode[childrenLst.size()];
+        NetworkNode[] childrenArr = new NetworkNode[childrenLst.size()]; //conversion to array
         for (int i = 0; i < childrenArr.length; i++) {
             childrenArr[i] = childrenLst.get(i);
         }
         this.children = childrenArr;
     }
 
-
+    /**
+     * Initializing keys of array. According to parents and the node itself, it being as the last column of each table (on the right).
+     *
+     * @param arr
+     */
     public void initTable(double[] arr) {
         NetworkNode[] columnNodes = this.addCurrNodeToParents();
         String[][] keys = new String[arr.length + 1][columnNodes.length];

@@ -15,6 +15,7 @@ public class BayesBallQuery implements Query {
         this.givenNodes = givenNodes;
         this.givenValues = givenValues;
     }
+
     /**
      * Func will be done recursively:
      * Stop sings and return a specific value:
@@ -22,7 +23,7 @@ public class BayesBallQuery implements Query {
      * - the algorithm was "stuck" with no other previously unvisited nodes which it can visit.
      * - the algorithm returned to its starting point
      * - if either the src or target nodes are coloured, they are conditionally independent
-     * <p>
+     * - a node cannot be reached more than twice (once in every direction)
      * <p>
      * Algorithm:
      * For every node accessed, we want to go to all other parent and child nodes. We check if it is possible, then run the
@@ -42,7 +43,7 @@ public class BayesBallQuery implements Query {
         //answers the question: are the nodes conditionally independent?
 
         HashMap<String, Integer> timesVisited = new HashMap<>();
-        for (int i = 0; i < nodes.size(); i++) {
+        for (int i = 0; i < nodes.size(); i++) { //set all HashMap values to 0
             timesVisited.put(nodes.get(i).getName(), 0);
         }
         if (this.srcOrDestGiven()) return "yes"; //nodes conditionally independent if one of them is given
@@ -50,6 +51,16 @@ public class BayesBallQuery implements Query {
         else return "no";
     }
 
+    /**
+     * Recursive function described above
+     *
+     * @param nodes        list of nodes
+     * @param canGoTo      ANY/PARENTS/CHILDREN - where the current node can go
+     * @param currentNode  current node
+     * @param isFirstIter  first iteration of the function (used to check if the src and destination are identical)
+     * @param timesVisited HashMap to define how many times each node was visited
+     * @return
+     */
     private boolean conditionallyIndependent(LinkedList<NetworkNode> nodes, int canGoTo, NetworkNode currentNode,
                                              boolean isFirstIter, HashMap<String, Integer> timesVisited) {
         // returns true if the nodes are independent: a path was not found
@@ -70,7 +81,8 @@ public class BayesBallQuery implements Query {
         timesVisited.put(currentNode.getName(), timesVisited.get(currentNode.getName()) + 1);
 
         if (canGoTo == ANY) {
-            if (!this.goToParents(nodes, currentNode, timesVisited) || !this.goToChildren(nodes, currentNode, timesVisited)) return false;
+            if (!this.goToParents(nodes, currentNode, timesVisited) || !this.goToChildren(nodes, currentNode, timesVisited))
+                return false;
             else return true;
         }
         if (canGoTo == CHILDREN) {
@@ -81,6 +93,14 @@ public class BayesBallQuery implements Query {
         }
     }
 
+    /**
+     * Calling conditionallyIndependent() on every parent node of current node as specified in the algorithm
+     *
+     * @param nodes        list of nodes
+     * @param currentNode  current node
+     * @param timesVisited HashMap of number of times each node was visited
+     * @return boolean value after all calculations
+     */
     private boolean goToParents(LinkedList<NetworkNode> nodes, NetworkNode currentNode, HashMap<String, Integer> timesVisited) {
         NetworkNode[] parents = currentNode.getParents();
         if (parents.length == 0) return true;
@@ -97,6 +117,14 @@ public class BayesBallQuery implements Query {
         return ret;
     }
 
+    /**
+     * Calling conditionallyIndependent() on every child node of current node as specified in the algorithm
+     *
+     * @param nodes        list of nodes
+     * @param currentNode  current node
+     * @param timesVisited HashMap of number of times each node was visited
+     * @return boolean value after all calculations
+     */
     private boolean goToChildren(LinkedList<NetworkNode> nodes, NetworkNode currentNode, HashMap<String, Integer> timesVisited) {
         NetworkNode[] children = currentNode.getChildren();
         if (children.length == 0) return true;
@@ -113,6 +141,11 @@ public class BayesBallQuery implements Query {
         return ret;
     }
 
+    /**
+     * returns whether the source or destination are given as evidence. returns true if so. Else returns false
+     *
+     * @return boolean value
+     */
     private boolean srcOrDestGiven() {
         if (Utilities.contains(this.givenNodes, this.src)) {
             return true;
